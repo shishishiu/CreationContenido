@@ -1,0 +1,224 @@
+<%@ page contentType="text/html; charset=iso-8859-1" language="java" import="java.sql.*" errorPage="" %>
+<%@ page contentType="text/html; charset=iso-8859-1" language="java" import="java.sql.*" errorPage="" %>
+<%@ page contentType="text/html; charset=iso-8859-1" language="java" import="java.net.*" errorPage="" %>
+<%@ page contentType="text/html; charset=iso-8859-1" language="java" import="org.apache.commons.fileupload.*" errorPage="" %>
+<%@ page contentType="text/html; charset=iso-8859-1" language="java" import="java.util.*" errorPage="" %>
+<%@ page contentType="text/html; charset=iso-8859-1" language="java" import="java.io.*" errorPage="" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" class="no-js"><!-- InstanceBegin template="/Templates/PlantContBachEduDis.dwt.jsp" codeOutsideHTMLIsLocked="false" -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<%@ page 
+     
+       import="java.sql.*"
+       import= "java.awt.*"
+       import ="java.net.*"
+        %>
+ <%@ include  file ="../../../Inc/var.txt"%>       
+<% /*html lang="en">contentType="text/html" pageEncoding="UTF-8"
+	<head><meta charset="UTF-8" />*/%>
+    <link href='<%=DirPayhGral%>M_C/UDEM.png' rel='shortcut icon' type='image/png'>
+		
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Universidad Digital del Estado de M&eacute;xico</title>
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Instituto de Educaci&oacute;n Media Superior y Superior @ Distancia</title>
+<!-- InstanceEndEditable -->
+<!-- InstanceBeginEditable name="head" -->
+<!-- InstanceEndEditable -->
+
+	<script language="JavaScript1.2"  src="../../../javascript/popcalendar.js"></script>
+  <script language="JavaScript1.2"  src="../../../js/validacion.js"></script>
+  
+  
+<script>
+function doit(cmd,target){
+	document.generic.command.value=cmd;
+	document.generic.target.value=target;
+	document.generic.submit();	
+}
+</script>
+		<meta name="description" content="Responsive Multi-Level Menu: Space-saving drop-down menu with subtle effects" />
+		<meta name="keywords" content="multi-level menu, mobile menu, responsive, space-saving, drop-down menu, css, jquery" />
+		<meta name="author" content="Codrops" />
+<link href='M_C/UDEM2.png' rel='shortcut icon' type='image/png'>
+		<link rel="stylesheet" type="text/css" href="css/default.css" />
+		<link rel="stylesheet" type="text/css" href="../../../css/component.css" />
+		<script src="../../../js/modernizr.custom.js"></script>
+                <meta name="viewport" content="width=device-width, user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
+                <link type="text/css" rel="stylesheet" href="../../../css/estilo2.css">
+                <link type="text/css" rel="stylesheet" href="../../../flechas/style.css">
+	</head> 
+    
+<BODY style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0" class="informationText" onLoad="javascript: history.go(1);" onUnload="javascript: history.go(1);">
+   <jsp:useBean id="BeanGenerico" scope="page" class="generica.Generica"/>
+   <jsp:useBean id="BeanNavegador" scope="page" class="generica.Navegadores"/>
+   <jsp:useBean id="BeanSeguridad" scope="page" class="Seguridad.Validaciones"/>
+            
+            
+            <%
+            String ua=request.getHeader("User-Agent").toLowerCase();
+			out.print(BeanNavegador.Tipo_Nav (ua) );            
+    %> 
+    <LINK REL=STYLESHEET TYPE="text/css" HREF="style/style_COFI.css" TITLE="Cool">
+
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+	             
+               <%@ include  file ="../../../Inc/ConForm.txt"%>
+
+<%
+ // HttpSession sesion = request.getSession(false);
+  
+HttpSession sesion = request.getSession(true);
+String NomLooginUsuarios = null;
+String TipUsuPerCad       = null;
+String   TipUsuPer        =null;
+String   AreaPer          =null;
+String LoginUsuario="111";
+String NombreUsuario="Usuario";
+String IdSession1 =""+sesion.getId();
+String IdSession2 ="";
+int PermisoUsuario=0;
+
+ NombreUsuario =(String )sesion.getValue("BachEduDis_Nombre");
+ TipUsuPer =(String )sesion.getValue("BachEduDis_TipLoginUsu");
+ LoginUsuario=(String )sesion.getValue("BachEduDis_Usuario");
+ AreaPer=(String )sesion.getValue("BachEduDis_AreaPer");
+String MatPer=(String )sesion.getValue("BachEduDis_MatPer");
+String CveMatPer=(String )sesion.getValue("BachEduDis_CveMatPer");
+String sSql  = "";
+
+
+     BeanSeguridad.Ini_Validaciones   (nomDriver, nomConection);
+     
+	if (BeanSeguridad.Verifica_Entrada ( IdSession1 , LoginUsuario) == -1 )
+	{
+        LoginUsuario=null;
+	}
+
+if (NombreUsuario !=null && TipUsuPer !=null && LoginUsuario !=null  )
+{
+  PermisoUsuario= Integer.parseInt(TipUsuPer);
+  
+  String imglogo="UDEM";
+  String fondoimg="#999999";
+  String FONDMENU="#d7d8d8";
+   String FONDTablaMENU="fondo_enc_NM";
+  String Baner ="";
+  
+ if (AreaPer != null )
+    {
+		
+		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+'LECTURA DE LAS OPCIONES PARA LA MATERIA
+'%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+  sSql  = "SELECT * FROM DatMat where CveMat = '"+MatPer+"' ";
+
+%>
+   		              <%@ include  file ="../../../Inc/ConForTC.txt"%>
+          <%
+                while (rs.next())
+	              {	 
+	                 imglogo=rs.getString("imglogo");
+					 fondoimg=rs.getString("fondoimg"); 
+					 FONDMENU=rs.getString("FONDMENU"); 
+					 FONDTablaMENU=rs.getString("FONDTablaMENU"); 
+					 Baner=rs.getString("Baner"); 
+					 
+					 }
+	         %>
+              <%@ include  file ="../../../Inc/ConForTCC.txt"%>	
+              <%
+	}
+  
+  fondoimg = FONDMENU;
+
+ %>
+
+            <jsp:useBean id="BeanGenerico2" scope="page" class="generica.menu"/>
+    
+            <header>
+            </a><img id="imgheader" src="../../../imagenes/images/propuesta--banner_manual.jpg"></a>	
+			</header>
+    <div class="imgmovil">
+        <div class="movil"><img src="../../../imagenes/MOVIL.png">
+            <div align="center"><%= BeanGenerico.FecHoy(1) + " " + ""%> </div>
+                <%=NombreUsuario%> (<%=LoginUsuario%>)
+                <br>
+                <div class="Materia">
+                <img src="../../../M_C/<%=imglogo%>.png" >    
+                </div>
+                 
+            </div>
+        </div>
+        
+</div>
+		<div class="container demo-3">	
+                    <header>
+     		    </header>
+			<div class="column"> 
+					<div id="dl-menu" class="dl-menuwrapper">
+						<button class="dl-trigger"></button> 
+						<ul class="dl-menu">	
+                         <ul class="dl-submenu">
+                          <li><a href="#"> Contenido</a> 
+                             <ul class="dl-submenu">
+                            
+                              <li><a href='<%=DirPayhGral%>index.jsp'> Materias</a>  </li> 
+                                <%
+								/*String Driver="com.mysql.jdbc.Driver"; String Conexion= "jdbc:mysql://187.141.8.153/dbmenus"; */
+								BeanGenerico2.Init_Validaciones(nomDriver,nomConection2,nomConectionUser,nomConectionpassword);
+								    if (MatPer != null )
+									    {
+											//String DirPathCont =(String )sesion.getValue("BachEduDis_DirPathCont");
+											%>
+                                            <li><a href='#'> Contenido Tematico</a>
+                                                 
+                                                   <%
+												    //out.print(MatPer); 
+													/*(String Directorio,int id_padre, String Materia) 
+													  out.print(BeanGenerico2.Menu_movil(DirPathCont,0,MatPer)  );
+													*/
+													out.print(BeanGenerico2.Menu_movil(0,MatPer));
+													%>
+                                                  
+                                            </li>
+                                           <%
+										   //out.print("	</li>");
+										}
+							 %>
+                      </ul>
+                
+                </li>
+                <li><a href="#">Opciones</a> <% 
+				//(int id_padre ,String dir , String a) out.print(BeanGenerico2.Menu_movil(0));  
+				
+				 
+				out.print(BeanGenerico2.Menu_movil (0,DirPayhGral,""+PermisoUsuario)); 
+				//out.print("");  %>
+                </li>
+            </ul>
+        </ul>
+                            
+                            
+                             
+					</div><!-- /dl-menuwrapper -->
+				</div>
+			<!--</div>-->
+		</div><!-- /container -->
+               
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<script src="../../../js/jquery.dlmenu.js"></script>
+		<script>
+			$(function() {
+				$( '#dl-menu' ).dlmenu({
+					animationClasses : { classin : 'dl-animate-in-5', classout : 'dl-animate-out-5' }
+				});
+			});
+		</script>
+                <div class="conte">     
+            <section class="mainmio">
+             <div class="centrar">
+             
+ 	        <!-- InstanceBeginEditable name="Trabajo" -->

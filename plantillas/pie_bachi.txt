@@ -1,0 +1,16 @@
+	<!-- InstanceEndEditable --> 
+ 	        </div>
+         </section>
+                </div>
+        <footer>
+            <img src="../../../imagenes/footer.png">
+    </footer>
+    
+    <%} 
+else
+{
+response.sendRedirect("../../../Autentifica.jsp");
+}
+  %>
+	</body>
+<!-- InstanceEnd --></html>

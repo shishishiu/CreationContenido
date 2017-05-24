@@ -1,0 +1,11 @@
+El C.{0} Jefa del Departamento de Desarrollo Académico, acepta la terminación y entrega contenidos {1} cumpliendo las siguientes cláusulas:
+
+a) Los productos y soporte documental para la operación del sistema acordados y generados son:
+	{2}
+
+b) Bajo las siguientes condiciones de entrega:
+	Se hace entrega de la siguientes contenidos:
+	{3}
+
+	Los módulos liberados satisfacen con los requerimientos de manera precisa, es flexible, funcional y satisface las necesidades y se acepta la migración a producción.
+	

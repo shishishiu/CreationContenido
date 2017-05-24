@@ -1,0 +1,47 @@
+#DB
+db_crecon_a_comment=Configuracion de base de datos de Creacion Contenido
+db_crecon_userName=usrcreacont
+db_crecon_password=usrcreacont
+db_crecon_dbms=mysql
+db_crecon_serverName=187.141.8.153:3306
+db_crecon_baseDeDatos=dbcreacontenido
+db_crecon_driverName=com.mysql.jdbc.Driver
+
+#DB Bachillerato
+db_bac_a_comment=Configuracion de base de datos de Bachillerato
+db_bac_userName=UsrMenus
+db_bac_password=Menus
+db_bac_dbms=mysql
+db_bac_serverName=187.141.8.153:3306
+db_bac_baseDeDatos=dbmenus
+db_bac_driverName=com.mysql.jdbc.Driver
+
+#DB Licenciatura
+db_lic_a_comment=Configuracion de base de datos de Licenciatura
+db_lic_userName=root
+db_lic_password=Desarrollo09
+db_lic_dbms=mysql
+db_lic_serverName=187.141.8.153:3306
+db_lic_baseDeDatos=dbprublicshima
+db_lic_driverName=com.mysql.jdbc.Driver
+
+#FTP Para exportar los archivos de los contenidos.
+ftp_a_comment=Configuracion de FTP para exportar los archivos de los contenidos. 
+ftp_lic_server=187.141.8.155
+ftp_lic_port=25
+ftp_lic_user=Licenciaturas
+ftp_lic_password=Licenciaturas
+
+#PathFile
+absolute_path=D:\\Tomcat\\webapps\\CreationContenido
+pathFile_root=/jsp/
+pathFile_materia=catalogos/materia/
+pathFile_usuario=catalogos/usuario/
+pathFile_conf=configuracion/
+userfiles_path=CreationContenido/userfiles
+userfiles=userfiles
+plantillas=plantillas
+
+#URL Direccion de prueba de Licenciatura
+url_a_comment=Direccion de prueba. 
+url_prueba_lic=http://187.141.8.155/SISCRECON/index.jsp

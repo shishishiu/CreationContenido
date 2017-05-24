@@ -1,0 +1,51 @@
+ 	<!-- InstanceEndEditable -->	
+ </div>
+  <table width="100%"   border="1" cellpadding="1">
+      <tr>
+        <td > 
+  <div style="overflow: auto; width: 100%; height: 52px;" id="divscroll2">
+ 	<!-- InstanceBeginEditable name="Titulos" -->
+ 	<table width="100%" border="0" height="100%" >
+      <tr>
+        <td width="20%">&nbsp;</td>
+        <td class="label_Conceptual">{0}</td>
+        <td width="20%">&nbsp;</td>
+      </tr>
+    </table>
+    <!-- InstanceEndEditable -->	
+ </div></td></tr></table>
+</td>
+ 
+  </tr>
+</table>
+</td></Tr>
+</table>
+<!-- Begin Footer Nav -->
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0" bordercolor="red" bgcolor="#FFFFFF" 
+ 
+ class="fondoInf" >
+  <tr>
+    <td>
+<table width="800" border="0" align="center" cellpadding="0" cellspacing="0" bordercolor="red"   >
+  <tr>
+    <td colspan="5" height="67"><div align="center"><img src="../../../../Img/ImgGral/Gral/pleca_abajo.png" width="800" height="75" border="0" usemap="#Creditos"></div></td>
+  </tr>
+  <tr>
+    <td colspan="5" height="17"  ><div align="center"><span class="Estilo7">Esta p&aacute;gina esta dise&ntilde;ada para verse mejor en una resoluci&oacute;n de 800 x 600 &oacute; superior Internet Explorer 5.0 &oacute; superior&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ultima actualizaci&oacute;n: 25 de Junio del 2016 </span></div>
+       </td>
+  </tr>
+</table>
+</td></tr></table>
+<%} 
+else
+'{
+response.sendRedirect("../../../../Autentifica.jsp");
+}'
+  %>
+  
+<map name="Creditos" id="Creditos">
+  <area shape="rect" coords="279,13,330,22" href="#" title="Diseñador: Departamento de Desarrollo y Producción de contenidos Virtuales">
+  <area shape="rect" coords="350,13,399,24" href="#" title="Desarrollo: Juan Antonio Hernández Mendiola">
+</map>
+</body>
+<!-- InstanceEnd --></html>

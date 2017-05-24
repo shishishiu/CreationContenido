@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="OFF">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{DEFAULT} | [%t] | %-5level | %c{36} | %msg%n"/>
+        </Console>
+<!--    <File name="File" fileName="C:\\logs\error.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} | [%t] | %-5level | %c{36} | %msg%n"/>
+        </File> -->
+        <RollingFile name="RollingFile" fileName="C:\\logs\error.log" 
+        filePattern="C:\\logs\%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} | [%t] | %-5level | %c{36} | %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="trace">
+            <AppenderRef ref="File" />
+            <AppenderRef ref="RollingFile" />
+        </Root>
+        <Logger name="test" level="trace" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="File" />
+            <AppenderRef ref="RollingFile" />
+        </Logger>
+    </Loggers>
+</configuration>

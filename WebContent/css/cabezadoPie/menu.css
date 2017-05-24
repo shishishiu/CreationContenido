@@ -1,0 +1,34 @@
+@charset "iso-8859-1";
+
+code {color: red}
+
+/* CoolMenus 4 - default styles - do not edit */
+.clCMAbs{position:absolute; visibility:hidden; left:0; top:0}
+/* CoolMenus 4 - default styles - end */
+  
+/*Style for the background-bar*/
+.clBar {position: absolute; width: 10; height: 10; visibility: hidden}
+
+/*Styles for level 0*/
+.clLevel0,.clLevel0over {position: absolute; padding: 2px; font-family: tahoma,arial,helvetica; font-size: 10px; font-weight: normal}
+.clLevel0 {background-color: #D7D8D8; layer-background-color: #D7D8D8; color: #4C4C4C}
+.clLevel0over {background-color: #7F7F7F; layer-background-color: #C0E1A6; color: #F9F9F9; cursor: default; cursor: default}
+.clLevel0border {position: absolute; visibility: hidden; background-color: #BBBBBB; layer-background-color: #BBBBBB}
+
+/*Styles for level 1*/
+.clLevel1, .clLevel1over {position: absolute; padding: 2px; font-family: tahoma, arial,helvetica; font-size: 10px; font-weight: normal; z-index: 20}
+.clLevel1 {background-color: #D7D8D8; layer-background-color: #D7D8D8; color: #4C4C4C; z-index: 20}
+.clLevel1over {background-color: #7F7F7F; layer-background-color: #C0E1A6; color: black; cursor: default; cursor: default; z-index: 20}
+.clLevel1border {position: absolute; visibility: hidden; background-color: #BBBBBB; layer-background-color: #BBBBBB; z-index: 20}
+
+/*Styles for level 2*/
+.clLevel2, .clLevel2over{position:absolute; padding:2px; font-family:tahoma,arial,helvetica; font-size:10px; font-weight:normal}
+.clLevel2 {background-color: #D7D8D8; layer-background-color: #D7D8D8; color: #4C4C4C}
+.clLevel2over {background-color: #7F7F7F; layer-background-color: #7F7F7F; color: #EFEFEF; cursor: default; cursor: default}
+.clLevel2border{position:absolute; visibility:hidden; background-color:#BBBBBB; layer-background-color:#BBBBBB}
+
+/* Styles for status bar */
+TABLE.status {background: #D7D8D8; color: #575757; width: 720; border: hidden}
+
+TD.status {layer-background-color: #D7D8D8; font-family: tahoma,arial,helvetica; font-size: 10pt; font-weight: normal; padding: 3px; border: none}
+#BODY {margin: 0px 0px 0px 0px}

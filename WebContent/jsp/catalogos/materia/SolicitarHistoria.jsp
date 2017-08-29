@@ -15,7 +15,7 @@
     		<script src="js/materia/SolicitarHistoria.js"></script>		
 			<section style="clear: both">
 
-	            <form action="SolicitarHistoria" method="post" name="form1" id="form1">
+	            <form action="SolicitarHistoria" method="post" name="form2" id="form2">
             		<div class="ui-widget message">
 						<div class="ui-state-highlight ui-corner-all msg" >
 							<p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>

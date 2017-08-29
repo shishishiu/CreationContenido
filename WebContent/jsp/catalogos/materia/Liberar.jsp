@@ -29,11 +29,11 @@
 	                    
 	                    <table class="list1 green" style="width:55%25">
 	                         <tr>
-	                            <th width="30%25" class="right">Fecha de Liberar</th>
+	                            <th width="30%25" class="right">Fecha de Liberación</th>
 	                            <td width="70%25" class="left">${fechaSolicitud}</td>
 	                        </tr>
 	                        <tr>
-	                            <th width="30%25" class="right">Persona de Liberar</th>
+	                            <th width="30%25" class="right">Persona de Liberación</th>
 	                            <td width="70%25" class="left">${usuario.cveUsu} ${usuario.nomUsu}</td>
 	                       </tr>
 	                        <tr>

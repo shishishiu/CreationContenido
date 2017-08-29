@@ -4,6 +4,7 @@
     Author     : UDEM
 --%>
 
+<%@page import="java.io.File"%>
 <%@page contentType="text/html" pageEncoding="ISO-8859-1"%>
 <jsp:include page="/jsp/Master.jsp">
 	<jsp:param name="title" value="Iniciar Sesión" /> 
@@ -23,6 +24,7 @@
 	            </p>
 	           </div>
 	            <input type="submit" name="Submit" value="Iniciar sesión" class="botonimagenchico"  />
+	            	            
 	        </form>
 		</section>
 		</jsp:attribute>

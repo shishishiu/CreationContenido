@@ -86,24 +86,31 @@
                    	
 			            <table class="list1 green">
 			               <tr>
-			                   <th width="10%25">Nivel</th>
+			                   <th width="20%25" colspan="2">Nivel</th>
 			                   <th width="5%25">Modulo</th>
-			                   <th width="12%25">Clave</th>
-			                   <th width="33%25">Nombre de la Materia</th>
+			                   <th width="10%25">Clave</th>
+			                   <th width="30%25">Nombre de la Materia</th>
 			                   <th width="10%25">Solicitud</th>
-			                   <th width="15%25">Fecha de Solicitud</th>
+			                   <th width="10%25">Fecha de Solicitud</th>
 			                   <c:if test="${usuario.perUsu == perAdminGeneral || usuario.perUsu == perAdmin}">
 			                    <th width="5%25">Modificar</th>
 			                    <th width="5%25">Baja</th>
 			                   </c:if>
 			                   <c:if test="${usuario.perUsu == perAdminGeneral}">
-			                    <th colspan="1" width="5%25">Subir a prueba</th>
-			                    <th width="5%25">JSP</th>
+			                    <th colspan="1" width="5%25" title="Antes de exportar los contenidos, tiene que hacer clic en el enlace de 'crear' que está al lado de esta columna">Exportar Contenidos</th>
+			                    <th width="5%25" title="Si modifica los contenidos y los quiere exportar, haga clic en este enlace. Y luego, haga clic en el enlace de 'exportar'">Crear Contenidos</th>
 			                   </c:if>
 			               </tr>
 			               <c:forEach var="materia" items="${materias}" varStatus="status">
-						  <tr class="datarow">
+			               <c:if test="${materia.banMat == 1}">
+			               	<tr class="datarow">
+			               </c:if>
+			               <c:if test="${materia.banMat == 0}">
+			               	<tr class="datarow deletedRow">
+			               </c:if>
+			               						  
 						    <td style="text-align:center">${materia.nomNivel}</td>
+						    <td style="text-align:left">${materia.nomNivelGrado}</td>
 						    <td style="text-align:center">${materia.modulo}</td>
 						    <td style="text-align:center">${materia.cveMat}</td>
 						    <td>
@@ -125,9 +132,9 @@
 						    		<c:when test="${materia.banMat == 0}">
 										${materia.matSol.nomEstadoSolicitud}
 									</c:when>
-						    		<c:when test="${(materia.matSol.estadoSolicitud != produccion) 
-						    	&& (usuario.perUsu == perAdminGeneral 
+						    		<c:when test="${(usuario.perUsu == perAdminGeneral 
 								|| (usuario.perUsu == perAdminGeneral && materia.matSol.estadoSolicitud == liberado)
+								|| (usuario.perUsu == perAdmin && materia.matSol.estadoSolicitud == produccion)
 								|| (usuario.perUsu == perAdmin && materia.matSol.estadoSolicitud == validado)
 								|| (usuario.perUsu == perAdmin && materia.matSol.estadoSolicitud == revisado)
 								|| (usuario.perUsu == perAsesor && materia.matSol.estadoSolicitud == pendiente && materia.permisoContenido > 0)

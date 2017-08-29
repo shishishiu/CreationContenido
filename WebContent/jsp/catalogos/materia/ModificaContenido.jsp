@@ -44,9 +44,9 @@
                                 <table style="border:none;width:100%25">
                                     <tr>
                                         <td style="border:none">
-                                            <input type="button" name="Submit" value="Guardar" class="botonimagenchico botonimagenchicoWidth" onclick="funcGuardar()" />
-                                            <input type="button" name="Submit" value="Ver Servidor" class="botonimagenchico botonimagenchicoWidth" onclick="funcShowCkfinder()" />
-                                            <input type="button" name="Submit" value="Agregar Archivos" class="botonimagenchico botonimagenchicoWidth" onclick="funcAgregaImagenes()"  />
+                                            <input type="button" name="Submit" value="Guardar" class="botonimagenchico" onclick="funcGuardar()" />
+                                            <input type="button" name="Submit" value="Ver Servidor" class="botonimagenchico" onclick="funcShowCkfinder()" />
+                                            <input type="button" name="Submit" value="Agregar Archivos" class="botonimagenchico" onclick="funcAgregaImagenes()"  />
                                         </td>
                                     </tr>
                                 </table>
@@ -125,7 +125,7 @@
 				                        		{ name: 'about', groups: [ 'about' ] }
 				                        	],
 					        
-					        removeButtons: 'Save,NewPage,Styles,Format,Font,FontSize,Iframe,Smiley,BGColor ${editorConfigSource}',
+					        removeButtons: 'Save,NewPage,Styles,Format,Font,FontSize,Smiley,BGColor ${editorConfigSource}',
 					        removeDialogTabs : 'flash:Upload;image:Upload',
 					        colorButton_colors : '000000,FF0000,0000FF',
 					        colorButton_enableMore : false,

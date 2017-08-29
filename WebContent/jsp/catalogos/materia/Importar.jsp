@@ -22,7 +22,7 @@
 								<strong id="innerMessage">${message}</strong></p>
 							</div>
 						</div>
-		                   <h3>Materia</h3>
+		                   <h3>Importar Materia</h3>
 		                   <table class="list1 condition" style="width:50%25">
 		                   	<tr>
 		                   		<th style="width:20%25">Nivel</th>
@@ -34,7 +34,7 @@
 			                       </select>			                       
 			                       
 			                       <c:forEach var="nivelGrado" items="${nivelGrados}" varStatus="status">
-										<select id="nivelGrado${status.index+1}" name="nivelGrado${status.index+1}">
+										<select id="nivelGrado${status.index+1}" name="nivelGrado${status.index+1}" onchange="funcBuscar()">
 											<option value="0" >------------</option>
 											<c:forEach var="grado" items="${nivelGrado}">
 				       	                    	<option value="${grado.cveNivelGrado}" ${grado.selected}>${grado.nomNivelGrado}</option>
@@ -44,15 +44,47 @@
 			                       
 		                   		</td>
 		                   	</tr>
-		                   	<tr>
-		                   		<th>Materia</th>
-		                   		<td style="text-align: left"><input type="text" size="60" id="cveMat" name="cveMat" value="${nombre}"/></td>
-		                   	</tr>
 		                   
 		                   </table>
+		                   
+		
+							<c:if test="${existResultado}" var="existResultado" />
+		                   	<c:if test="${!existResultado}" >
+		                   		<p style="text-align:center">No hay información</p>
+		                   	</c:if>
+		                   	<c:if test="${existResultado}" >		
+		                   	
+		                   	    <table style="margin:auto;width:40%25">
+					            	<tr>
+					            		<td style="text-align:center; width:90%25">${paginas}</td>
+					            		<td style="text-align:right; width:10%25">Total ${numtotal}</td>
+					            	</tr>
+					            </table>
+		                   	
+					            <table class="list1 green" style="width:40%25">
+					               <tr>
+					                   <th width="20%25">Clave</th>
+					                   <th width="70%25">Nombre de la Materia</th>
+					                   <th width="10%25">Importar</th>
+					               </tr>
+					               <c:forEach var="materia" items="${materias}" varStatus="status">
+					               	<tr class="datarow">
+									    <td style="text-align:center">${materia.cveMat}</td>
+									    <td style="text-align:left">${materia.nomMat}</td>
+									    <td style="text-align:center">
+									    	<a href="javascript:void(0)" onclick="funcImportar('${materia.cveMat}','${materia.nivel}','${materia.nivelGrado}')">importar</a>
+									    </td>
+									 </tr>
+									</c:forEach>
+					           </table>
+		               		</c:if>
+		                   
+		                   
 		                   <div style="margin-top:10px">
-		                       <input type="button" value="Importar" id="importar" class="botonimagenchico" onclick="funcImportar()"/>
 			 		           <input type="hidden" id="hiddenTipo" name="hiddenTipo" value=""/>
+			 		           <input type="hidden" id="hiddenCveMat" name="hiddenCveMat" value=""/>
+			 		           <input type="hidden" id="hiddenNivel" name="hiddenNivel" value=""/>
+							   <input type="hidden" name="hiddenCurrentPagina" id="hiddenCurrentPagina" value="${currentPagina}"/>
 		                   </div>
 		               </div>
 		           </form>

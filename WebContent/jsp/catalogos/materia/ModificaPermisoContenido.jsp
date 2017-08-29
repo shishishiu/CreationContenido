@@ -38,21 +38,21 @@
 	                                <th width="30%25" class="right">Clave</th>
 									<td width="70%25" class="left">${materia.cveMat}</td>
 								</tr>
-								<tr>
-									<th width="30%25" class="right">Modulo</th>
-	                                <td width="70%25" class="left">${materia.modulo}</td>	
-	                            </tr>
 	                            <tr>
 	                                <th width="30%25" class="right">Nombre</th>
 	                                <td width="70%25" class="left">${materia.nomMat}</td>
 	                            </tr>
 	                            <tr>
-	                                <th width="30%25" class="right">Unidad</th>
-	                                <td width="70%25" class="left">${materia.unidad}</td>
-	                            </tr>
-	                            <tr>
 	                                <th width="30%25" class="right">Nivel</th>
 	                                <td width="70%25" class="left" colspan="3">${materia.nomNivel} ${materia.nomNivelGrado}</td>
+	                            </tr>
+								<tr>
+									<th width="30%25" class="right">Modulo</th>
+	                                <td width="70%25" class="left">${materia.modulo}</td>	
+	                            </tr>
+	                            <tr>
+	                                <th width="30%25" class="right">Unidad</th>
+	                                <td width="70%25" class="left">${materia.unidad}</td>
 	                            </tr>
 	 	                	</table>
 							

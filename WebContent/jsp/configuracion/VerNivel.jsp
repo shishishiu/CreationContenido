@@ -53,7 +53,7 @@
 													<i class='material-icons md-18'>delete</i></a>
 												</c:if>
 												<c:if test="${nivelgrado.tieneMateria == 'true'}">
-													<i class='material-icons md-18 md-inactive'>delete</i>
+													<i class='material-icons md-18 md-inactive' title="Este nivel ya tiene materiales y no se puede borrar. Si quieres borrarlo, primero baja las materiales que pertenece a este nivel.">delete</i>
 												</c:if>
 												
 											</td>

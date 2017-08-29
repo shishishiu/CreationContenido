@@ -54,13 +54,13 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th width="30%25" class="right">Nombre Padrino</th>
+                                <th width="30%25" class="right">Apellido Padrino</th>
                                 <td width="60%25" class="left">
                                 	<input type="text" size="50" value="${usu.nomPatUsu}" name="nomPatUsu" id="nomPatUsu"/>
                                 </td>
                             </tr>
                             <tr>
-                                <th width="30%25" class="right">Nombre Madrino</th>
+                                <th width="30%25" class="right">Apellido Madrino</th>
                                 <td width="60%25" class="left">
                                 	<input type="text" size="50" value="${usu.nomMatUsu}" name="nomMatUsu" id="nomMatUsu"/>
                                 </td>
@@ -69,7 +69,6 @@
                                 <th width="30%25" class="right">Permiso</th>
                                 <td width="60%25" class="left">
 									<select id="permiso" name="permiso">
-										<option value="-1">--------</option>
 										<c:forEach var="permiso" items="${permisos}">
 			       	                    	<option value="${permiso.code}" ${permiso.selected}>${permiso.nomCode}</option>
 			                        	</c:forEach>
@@ -79,7 +78,7 @@
                            <tr>
                                 <th width="30%25" class="right">Contraseña</th>
                                 <td width="60%25" class="left">
-                                	<input type="text" size="20" value="${usu.pwsUsu}" name="pwsUsu" id="pwsUsu"/>
+                                	<input type="text" size="20" value="" name="pwsUsu" id="pwsUsu"/>
                                 </td>
                             </tr>
                     </table>

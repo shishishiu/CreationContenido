@@ -17,7 +17,7 @@
 			<section style="clear: both">
 
 <style type="text/css">
-li{
+#contsmenu li{
 	list-style-type: none;
 	margin: 10px 0px 10px 0px;
 }
@@ -62,7 +62,7 @@ li{
             </div>
             <c:if test="${materia.cveMat != ''}" >
             
-            <div style="overflow:scroll; height:350px">
+            <div style="overflow:scroll; height:350px" id="contsmenu">
 
 
             ${menuHtml}

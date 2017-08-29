@@ -43,14 +43,14 @@
 		                   	<tr>
 		                   		<th>Archivo del encabezado</th>
 		                   		<td>
-		                   			<input type="button" value="Download" class="botonimagenchico" onclick="funcDownload(1)"/>
+		                   			<input type="button" value="Descargar" class="botonimagenchico" onclick="funcDownload(1)"/>
 		                   			<input type="button" value="Modificar" class="botonimagenchico" onclick="funcOpenModificar(1)"/>
 		                   		</td>
 		                   	</tr>
 		                   	<tr>
 		                   		<th>Archivo del pie</th>
 		                   		<td>
-		                   			<input type="button" value="Download" class="botonimagenchico" onclick="funcDownload(2)"/>
+		                   			<input type="button" value="Descargar" class="botonimagenchico" onclick="funcDownload(2)"/>
 		                   			<input type="button" value="Modificar" class="botonimagenchico" onclick="funcOpenModificar(2)"/>
 		                   		</td>
 		                   	</tr>

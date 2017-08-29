@@ -29,11 +29,11 @@
 		                   	<tr>
 		                   		<th>Clave</th>
 		                   		<td>
-		                   			<input type="text" size="12" maxlength="20" id="cveUsu" name="cveUsu" value="${cveUsu}"/>
+		                   			<input type="text" size="20" maxlength="20" id="cveUsu" name="cveUsu" value="${cveUsu}"/>
 		                   		</td>
 		                   		<th>Nombre</th>
 		                   		<td>		                   					                   		
-		                   			<input type="text" size="12" maxlength="20" id="nombre" name="nomUsu" value="${nomUsu}"/>
+		                   			<input type="text" size="20" maxlength="20" id="nombre" name="nomUsu" value="${nomUsu}"/>
 		                   		</td>
 		                   		<th>Permiso</th>
 		                   		<td>
@@ -75,7 +75,15 @@
 			                   <th width="5%25">Baja</th>
 			               </tr>
 			               <c:forEach var="usuario" items="${usuarios}" varStatus="status">
-							  <tr class="datarow">
+
+				               <c:if test="${usuario.banUsu == 1}">
+				               	<tr class="datarow">
+				               </c:if>
+				               <c:if test="${usuario.banUsu == 0}">
+				               	<tr class="datarow deletedRow">
+				               </c:if>
+
+
 							    <!--<td style="text-align:center">${status.count}</td> -->
 							    <td style="text-align:center">${usuario.cveUsu}</td>
 							    <td style="text-align:left">${usuario.nomCompletoUsu}</td>

@@ -18,7 +18,7 @@
 		});
 
 		</script>  
-		<form action="AgregaContenido" method="post" name="form1" id="form1">
+		<form action="AgregaContenido" method="post" name="form1" id="form2">
 		    <div style="text-align: center; margin-bottom: 10px">
 		    
 	            <table style="width: 40%25; border: 0;  text-align: center" class="list1 green">

@@ -207,7 +207,7 @@ public class NivelGrado implements Serializable {
 			String query = "SELECT ng.CveNiv_Grado ,CveNiv ,NomNiv_Grado ,NomGrado ,BanGrado, "
 					+ " CASE WHEN COUNT(m.cvemat) > 0 THEN 'true' ELSE 'false' END AS TieneMateria" 
 					+ " FROM tblniv_Grado ng"
-					+ " LEFT JOIN tblmat m ON ng.CveNiv_Grado = m.CveNiv_Grado "
+					+ " LEFT JOIN tblmat m ON ng.CveNiv_Grado = m.CveNiv_Grado AND banmat=1"
 					+ " WHERE CveNiv = ? AND BanGrado = 1"
 					+ " GROUP BY ng.CveNiv_Grado ,CveNiv ,NomNiv_Grado ,NomGrado ,BanGrado"
 					+ " ORDER BY ng.CveNiv_Grado";

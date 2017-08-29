@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.text.MessageFormat;
@@ -17,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import beans.Materia;
+import beans.MateriaSolicitud;
 import beans.Nivel;
 import beans.NivelGrado;
 import beans.NivelGradoCombos;
@@ -27,13 +30,15 @@ import util.conf.Configuracion;
 import util.db.MySqlConnector;
 import util.string.StringUtil;
 
+import org.apache.commons.io.*;
+
 /**
  * Servlet implementation class Importar
  */
 @WebServlet("/Importar")
 public class Importar extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	/** Nombre de la p√°gina **/
+	/** Nombre de la p·gina **/
 	private final String NOMBRE_DE_PAGINA = "Importar.jsp";
 	/** Nombre del form de niveles **/
 	private final String KEY_VARIABLE_NIVELES = "niveles";
@@ -44,6 +49,16 @@ public class Importar extends HttpServlet {
 	/** Nombre del form de niveles **/
 	private final String KEY_VARIABLE_NIVELES_GRADO = "nivelGrados";
 	/** Nombre del form de nivel **/
+	private final String KEY_VARIABLE_EXIST_RESULTADO = "existResultado";
+	/** Nombre del form de materias **/
+	private final String KEY_VARIABLE_MATERIAS = "materias";
+	/** Nombre del form del permiso **/
+	private final String KEY_VARIABLE_NUMERO_TOTAL = "numtotal";
+	/** Nombre del form del permiso **/
+	private final String KEY_VARIABLE_PAGINAS = "paginas";
+	/** Nombre del form del permiso **/
+	private final String KEY_VARIABLE_CURRENT_PAGINA = "currentPagina";
+	/** Nombre del form de nivel **/
 	private final String KEY_FORM_NIVEL = "nivel";
 	/** Nombre del form del nombre **/
 	private final String KEY_FORM_NOMBRE = "cveMat";
@@ -52,9 +67,17 @@ public class Importar extends HttpServlet {
 	/** Nombre del variable **/	
 	private final String KEY_FORM_HIDDEN_TIPO = "hiddenTipo";
 	/** Nombre del variable **/	
+	private final String KEY_FORM_HIDDEN_CVE_MAT = "hiddenCveMat";
+	/** Nombre del variable **/	
+	private final String KEY_FORM_HIDDEN_NIVEL = "hiddenNivel";
+	/** Nombre del param de dar de baja **/
+	private final String KEY_HIDDEN_CURRENT_PAGINA = "hiddenCurrentPagina";
+	/** Nombre del variable **/	
 	private final String KEY_TIPO_VALIDACION = "1";
 	/** Nombre del variable **/	
 	private final String KEY_TIPO_IMPORTAR = "2";
+	/** Nombre del variable **/	
+	private final String KEY_TIPO_BUSCAR = "3";
 
 	/** Lista del nivel **/
 	private List<Nivel> listaNivel;
@@ -63,6 +86,7 @@ public class Importar extends HttpServlet {
 
 	/** Usuario **/
 	public Usuario usuario;
+	Configuracion config = new Configuracion();
 
     /**
      * @see HttpServlet#HttpServlet()
@@ -109,16 +133,27 @@ public class Importar extends HttpServlet {
     		if(usuario.IsAutorizado()){
     			if(usuario.isAdministrador() || usuario.isAdministradorGeneral()){
 
-    				String cveMat = request.getParameter(KEY_FORM_NOMBRE);
-    				String nivel = request.getParameter(KEY_FORM_NIVEL);
+					int currentPagina = GetCurrentPagina(request);
+					int numfrom = ((currentPagina-1)*Common.NUMERO_DE_DATOS_PARA_MOSTRAR);
+
     				if(tipo.equals(KEY_TIPO_VALIDACION)){
-    					Validacion(request, response, cveMat, nivel);
+    					Validacion(request, response);
    						return;
     					
     				}else if(tipo.equals(KEY_TIPO_IMPORTAR)){
-        				ImportarMateria(cveMat, nivel, request);
+        				ImportarMateria(request);
     					request.setAttribute(KEY_VARIABLE_MESSAGE, Common.MENSAJE_TERMINAR_PROCESO);
-    				}
+    					
+    				}else if(tipo.equals(KEY_TIPO_BUSCAR)){
+						numfrom = 0;
+    				}	
+    				
+    				
+    				int count = BuscarMateria(request, numfrom);
+    				request.setAttribute(KEY_VARIABLE_PAGINAS, Common.CreateListNumeroPagina(request, count, currentPagina));	    
+    				
+    				
+    				
     				
     			}else{
  
@@ -137,7 +172,6 @@ public class Importar extends HttpServlet {
     			
     			SetForm(request);
 
-    			Configuracion config = new Configuracion();
 				rd = getServletConfig().getServletContext().getRequestDispatcher(
 						config.getPathMateria() + NOMBRE_DE_PAGINA);
 			    rd.forward(request,response);		
@@ -158,33 +192,148 @@ public class Importar extends HttpServlet {
     		
 	}
 	
-	private boolean ImportarMateria(String cveMat, String nivel, HttpServletRequest request) throws Exception{
+	private int GetCurrentPagina(HttpServletRequest request) {
+		int currentPagina = 1;
+		if(StringUtil.isNumber(request.getParameter(KEY_HIDDEN_CURRENT_PAGINA))){
+			currentPagina = Integer.parseInt(request.getParameter(KEY_HIDDEN_CURRENT_PAGINA));
+		}
+		request.setAttribute(KEY_VARIABLE_CURRENT_PAGINA, currentPagina);
+		return currentPagina;
+	}
 
+	private int BuscarMateria(HttpServletRequest request, int numfrom) throws Exception{
+		List<Materia> list = new ArrayList<Materia>();
+		String strNivel = request.getParameter(KEY_FORM_NIVEL);
+		String nivelGrado = request.getParameter(KEY_FORM_NIVEL_GRADO + strNivel);
+		int count = 0;
+		
+		int nivel = Integer.parseInt(strNivel);
+		Connection con = null;
+
+		switch (nivel) {
+			case Common.NIVEL_BACHILLERATO:
+				con = MySqlConnector.getConnectionBac();
+				list = Materia.BuscarDeExternoBac(con, numfrom, Common.NUMERO_DE_DATOS_PARA_MOSTRAR);
+				count = Materia.CountMateriaDeExternoBac(con);
+				break;
+			case Common.NIVEL_LICENCIATURA:
+				con = MySqlConnector.getConnectionLic();
+				list = Materia.BuscarDeExternoLic(con, Integer.parseInt(nivelGrado), numfrom, Common.NUMERO_DE_DATOS_PARA_MOSTRAR);
+				count = Materia.CountMateriaDeExternoLic(con, Integer.parseInt(nivelGrado));
+				break;
+			default:
+				request.setAttribute(KEY_VARIABLE_MESSAGE, Common.MENSAJE_NO_SE_ELIGE_NIVEL);
+				return 0;
+		}
+		
+		request.setAttribute(KEY_VARIABLE_MATERIAS, list);
+		request.setAttribute(KEY_VARIABLE_EXIST_RESULTADO, list.size() > 0);
+		request.setAttribute(KEY_VARIABLE_NUMERO_TOTAL, count);
+		
+		return count;
+		
+	}
+
+	private boolean ImportarMateria(HttpServletRequest request) throws Exception{
+
+		String cveMat = request.getParameter(KEY_FORM_HIDDEN_CVE_MAT);
+		String strNivel = request.getParameter(KEY_FORM_HIDDEN_NIVEL);
+
+		
+		Connection conExt = null;
+		
+		int nivel = Integer.parseInt(strNivel);
+
+		switch (nivel) {
+			case Common.NIVEL_BACHILLERATO:
+				conExt = MySqlConnector.getConnectionBac();
+				break;
+			case Common.NIVEL_LICENCIATURA:
+				conExt = MySqlConnector.getConnectionLic();
+				break;
+			default:
+				break;
+		}
+		
+		
+		//importar los archivos de los contenidos
+		CopiarArchivos(cveMat, nivel, request, conExt);
+		
 		//importar base de datos
-		Insertar(cveMat, nivel, request);
+		Insertar(cveMat, nivel, request, conExt);
+		
 		
 		return true;
 	}
 
-	private void Insertar(String cveMat, String strNivel, HttpServletRequest request) throws Exception {
-		Connection conConVirt = null;
-		Connection con = null;
+	private void CopiarArchivos(String strCveMats, int nivel, HttpServletRequest request, Connection conExt) throws Exception {
 		
-		try{
-			
-			int nivel = Integer.parseInt(strNivel);
+//		String server = config.getFtpLicServer();
+//		int port = config.getFtpLicPort();
+//		String user = config.getFtpLicUser();
+//		String password = config.getFtpLicPassword();
+//		Sftp ftp = new Sftp(server, port, user, password, true, true, "ISO-8859-1");
 
+//		int nivGrado = Integer.parseInt(request.getParameter(KEY_FORM_HIDDEN_NIVEL_GRADO));
+//		NivelGrado beanNivGrado = NivelGrado.BuscarConCveNivGrado(nivGrado);
+
+		
+		String[] arrCveMat = strCveMats.split(",");
+		for(String cveMat : arrCveMat){
+		
+			Materia bean = Materia.BuscarDeExterno(conExt, cveMat);
+			String rootPath = "";
 			switch (nivel) {
 				case Common.NIVEL_BACHILLERATO:
-					con = MySqlConnector.getConnectionBac();
+					rootPath = config.getAbsolutePathBac();
 					break;
 				case Common.NIVEL_LICENCIATURA:
-					con = MySqlConnector.getConnectionLic();
+					rootPath = config.getAbsolutePathLic();
 					break;
 				default:
 					break;
 			}
 
+
+			String pathMat = bean.GetPathMateria(rootPath);
+			if(nivel == Common.NIVEL_LICENCIATURA){
+				pathMat = pathMat.replace("/Lic/", "/lic/");
+			}
+
+			
+			File srcDir = new File(pathMat);
+			File destDir = new File(bean.GetPathMateriaAbsolute());
+			
+			FileUtils.copyDirectory(srcDir, destDir);
+			
+			
+			
+//		    try {
+//
+//		      ftp.Connect();
+//	          
+//	          ftp.Get(beanNivGrado.getNomGrado() + "/" + bean.getModulo() + "/" + cveMat , bean.GetPathMateriaAbsolute());
+//	          
+//		    } catch(Exception e) {
+//		    	throw e;
+//		    } finally {
+//		    	if(ftp.getIsConnected()) {
+//			        try {
+//			        	ftp.Disconnect();
+//			        } catch(IOException ioe) {
+//			        	
+//			        }
+//		        }
+//		    }		
+		}
+		
+	}
+
+	private void Insertar(String cveMat, int nivel, HttpServletRequest request, Connection conExt) throws Exception {
+		Connection conConVirt = null;
+		
+		try{
+			
 			conConVirt = MySqlConnector.getConnection();
 			conConVirt.setAutoCommit(false);
 
@@ -200,12 +349,15 @@ public class Importar extends HttpServlet {
 				}
 				
 				//Si hay contenidos de la misma materia en este sistema, se los borra
-				List<TrcnMat> listExistCont = TrcnMat.Buscar(materia);
+				List<TrcnMat> listExistCont = TrcnMat.Buscar(materia, true);
 				if(listExistCont.size()>0){
 					TrcnMat.Delete(conConVirt, materia);
 					Common.InsertLogAct(request, conConVirt, usuario.getCveUsu(), 
 							MessageFormat.format(Common.TEXTO_ACTION_LOG_CONTENIDO_BORRAR, materia));
 				}
+				
+				//Borra logicamente los solicitudes
+				MateriaSolicitud.DarBajaLogical(conConVirt, materia);
 				
 
 				Nivel beanNiv = Nivel.Buscar(nivel);
@@ -213,7 +365,7 @@ public class Importar extends HttpServlet {
 				NivelGrado beanNivGrado = NivelGrado.BuscarConCveNivGrado(nivGrado);
 				
 				//Insertar materia
-				Materia beanMat = Materia.BuscarDeExterno(con, materia);
+				Materia beanMat = Materia.BuscarDeExterno(conExt, materia);
 				beanMat.setNivelGrado(nivGrado);
 				beanMat.setNomNivelDir(beanNiv.getNomDir());
 				beanMat.setNomGrado(beanNivGrado.getNomGrado());
@@ -223,10 +375,49 @@ public class Importar extends HttpServlet {
 						MessageFormat.format(Common.TEXTO_ACTION_LOG_MATERIA_IMPORTAR, materia));
 				
 				//Insertar contenidos
-				List<TrcnMat> listCont = TrcnMat.BuscarDeExterno(con, materia);
+				List<TrcnMat> listCont = TrcnMat.BuscarDeExterno(conExt, materia);
 				for(TrcnMat beanCont : listCont){
 					String handler = beanCont.getHandler();
-					beanCont.setContenido(GetHtml(beanMat, handler, conConVirt));
+					
+					if(handler != null){
+						int apartado = 0;
+						int unidad = 0;
+						
+						String[] arrStr = handler.split("_");
+						if(arrStr.length > 1){
+							
+							unidad = Integer.parseInt(arrStr[1]);
+							apartado = Integer.parseInt(arrStr[2]); 
+							
+							beanCont.setApartado(apartado);
+							beanCont.setUnidad(unidad);
+						}
+						
+					}else if(handler == null && beanCont.getCaption().indexOf(Common.CAPTION_CONTENIDO_UNIDAD)>=0){
+						
+						int unidad = 0;
+						String str = beanCont.getCaption().replaceAll("[^0-9][^I II III IV V VI VII VIII IX X]","");
+						
+						if(str.equals("I")){str = "1";}
+						else if(str.equals("II")){str = "2";}
+						else if(str.equals("III")){str = "3";}
+						else if(str.equals("IV")){str = "4";}
+						else if(str.equals("V")){str = "5";}
+						else if(str.equals("VI")){str = "6";}
+						else if(str.equals("VII")){str = "7";}
+						else if(str.equals("VIII")){str = "8";}
+						else if(str.equals("IX")){str = "9";}
+						else if(str.equals("X")){str = "10";}
+						
+						if(StringUtil.isNumber(str)){
+							unidad = Integer.parseInt(str);
+							beanCont.setUnidad(unidad);
+							
+						}						
+					}
+					
+					
+					beanCont.setContenido(GetHtml(beanMat, beanCont, conConVirt));
 					int cveCont = beanCont.Insertar(conConVirt);
 					Common.InsertLogAct(request, conConVirt, usuario.getCveUsu(), 
 							MessageFormat.format(Common.TEXTO_ACTION_LOG_CONTENIDO_IMPORTAR, cveCont));
@@ -241,8 +432,8 @@ public class Importar extends HttpServlet {
 			}			
 			throw e;
 		} finally{
-			if (con != null) {
-				con.close();
+			if (conExt != null) {
+				conExt.close();
 	        }			
 			if (conConVirt != null) {
 				conConVirt.setAutoCommit(true);
@@ -252,16 +443,17 @@ public class Importar extends HttpServlet {
 		
 	}
 
-	private Clob GetHtml(Materia materia, String handler, Connection conConVirt) throws Exception {
+	private Clob GetHtml(Materia materia, TrcnMat beanCont, Connection conConVirt) throws Exception {
 		Clob myClob;
 
 		try {
 
-			if(handler != null && !handler.equals("") && handler.indexOf(Common.EXTENSION_JSP)>=0){
+			if(beanCont.getHandler() != null && !beanCont.getHandler().equals("") && beanCont.getHandler().indexOf(Common.EXTENSION_JSP)>=0){
 			
-				String pathMat = materia.GetPathMateriaAbsolute();
-	        	String path = pathMat + File.separator + handler;
-	        	FileReader fr = new FileReader(path);
+				String absolutePath = materia.GetPathMateriaAbsolute() + File.separator + beanCont.getHandler();
+
+				
+	        	FileReader fr = new FileReader(absolutePath);
 	        	String PalRes="<!-- InstanceBeginEditable name=\"Trabajo\" -->";
 	        	String PalRes2 = "<!-- InstanceEndEditable -->";
 	        	
@@ -304,21 +496,29 @@ public class Importar extends HttpServlet {
 	         	
 				myClob = conConVirt.createClob();
 								
+				String pathMat = materia.GetPathMateriaRelative();
+				if(beanCont.getCaption().equals(Common.CAPTION_CONTENIDO_INTRODUCCION)){
+					
+					Cadena = Cadena.replaceAll(Common.CARPETA_IMG + "/" + Common.CARPETA_IMG_INT + "/",
+							Matcher.quoteReplacement(pathMat + "/" + Common.CARPETA_IMG + "/" + Common.CARPETA_IMG_INT + "/"));
 				
-//				Cadena = Cadena.replaceAll(Common.CARPETA_IMG + "/",
-//								Matcher.quoteReplacement(pathMat + "/" + Common.CARPETA_IMG + "/"));
-//				Cadena = Cadena.replaceAll(Common.CARPETA_IMG_INT + "/",
-//								Matcher.quoteReplacement(pathMat + "/" + Common.CARPETA_IMG_INT + "/"));
-//				Cadena = Cadena.replaceAll(Common.CARPETA_HTML5 + "/",
-//								Matcher.quoteReplacement(pathMat + "/" + Common.CARPETA_HTML5 + "/"));
-//				Cadena = Cadena.replaceAll(Common.CARPETA_SONIDO + "/",
-//								Matcher.quoteReplacement(pathMat + "/" + Common.CARPETA_SONIDO + "/"));
-//				Cadena = Cadena.replaceAll(Common.CARPETA_ACTIVIDADES + "/",
-//								Matcher.quoteReplacement(pathMat + "/" + Common.CARPETA_ACTIVIDADES + "/"));
-//				Cadena = Cadena.replaceAll(Common.CARPETA_ACTIVIDADES_COMPLEMENTARIAS + "/",
-//								Matcher.quoteReplacement(pathMat + "/" + Common.CARPETA_ACTIVIDADES_COMPLEMENTARIAS + "/"));
-//				Cadena = Cadena.replaceAll(Common.CARPETA_GNERALIDADES + "/",
-//								Matcher.quoteReplacement(pathMat + "/" + Common.CARPETA_GNERALIDADES + "/"));
+				}else{
+
+					Cadena = Cadena.replaceAll(Common.CARPETA_IMG + "/",
+							Matcher.quoteReplacement(pathMat + "/" + Common.CARPETA_IMG + "/"));
+					
+				}
+
+				Cadena = Cadena.replaceAll(Common.CARPETA_HTML5 + "/",
+								Matcher.quoteReplacement(pathMat + "/" + Common.CARPETA_HTML5 + "/"));
+				Cadena = Cadena.replaceAll(Common.CARPETA_SONIDO + "/",
+								Matcher.quoteReplacement(pathMat + "/" + Common.CARPETA_SONIDO + "/"));
+				Cadena = Cadena.replaceAll(Common.CARPETA_ACTIVIDADES + "/",
+								Matcher.quoteReplacement(pathMat + "/" + Common.CARPETA_ACTIVIDADES + "/"));
+				Cadena = Cadena.replaceAll(Common.CARPETA_ACTIVIDADES_COMPLEMENTARIAS + "/",
+								Matcher.quoteReplacement(pathMat + "/" + Common.CARPETA_ACTIVIDADES_COMPLEMENTARIAS + "/"));
+				Cadena = Cadena.replaceAll(Common.CARPETA_GNERALIDADES + "/",
+								Matcher.quoteReplacement(pathMat + "/" + Common.CARPETA_GNERALIDADES + "/"));
 
 						
 		        myClob.setString(1, Cadena);			
@@ -331,7 +531,11 @@ public class Importar extends HttpServlet {
 		return null;
 	}
 
-	private boolean Validacion(HttpServletRequest request, HttpServletResponse response, String cveMat, String strNivel) throws Exception {
+	private boolean Validacion(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		String cveMat = request.getParameter(KEY_FORM_NOMBRE);
+		String strNivel = request.getParameter(KEY_FORM_NIVEL);
+
 		
 		String message = "";
 		int nivel = 0;

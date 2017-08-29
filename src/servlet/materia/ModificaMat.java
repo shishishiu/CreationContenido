@@ -1,10 +1,13 @@
 package servlet.materia;
 
+import java.io.File;
 import java.io.IOException;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -14,6 +17,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.io.FileUtils;
 
 import beans.Materia;
 import beans.Nivel;
@@ -117,7 +122,7 @@ public class ModificaMat extends HttpServlet {
 				
 				try {
 			    		
-					SetForm(request, false);
+					SetForm(request, true);
 
 				} catch (Exception e) {
 					Common.Error(e);
@@ -155,36 +160,38 @@ public class ModificaMat extends HttpServlet {
 					
 					String cveMat = request.getParameter(KEY_FORM_HIDDEN_CVE_MAT);
 					String hidTipo = request.getParameter(KEY_FORM_HIDDEN_TIPO);
+					
+					boolean noError = true;
+					
 					if(hidTipo.equals(VALUE_REQUEST_PARAM_TIPO_AGREGAR)){
 						//Agregar la materia
 						if(IsValidatedAgregar(request)){
 							cveMat = AgregarMateria(request);
 						}else{
-							SetForm(request, true);
-							rd = getServletConfig().getServletContext().getRequestDispatcher(
-									config.getPathMateria() + NOMBRE_DE_PAGINA);
-						    rd.forward(request,response);
-						    return;
+							noError = false;
 						}
 						
 					}else if(hidTipo.equals(VALUE_REQUEST_PARAM_TIPO_MODIFICAR)){
 						//Modificar la materia
 						if(IsValidated(request)){
-							ModificarMateria(request, cveMat.replace(" ", ""));
+							noError =  ModificarMateria(request, cveMat.replace(" ", ""));
 						}else{
-							SetForm(request, true);
-							rd = getServletConfig().getServletContext().getRequestDispatcher(
-									config.getPathMateria() + NOMBRE_DE_PAGINA);
-						    rd.forward(request,response);
-						    return;
+							noError = false;
 						}
 					}
 				
-					SetForm(request, false);
-					
-					response.sendRedirect(Common.NOMBRE_DE_PAGINA_MODIFICA_PERMISO_CONTENIDO 
-							+ "?cveMat=" + cveMat);
+					SetForm(request, noError);
+					if(noError){
+						response.sendRedirect(Common.NOMBRE_DE_PAGINA_MODIFICA_PERMISO_CONTENIDO 
+								+ "?cveMat=" + cveMat);
 
+					}else{
+						rd = getServletConfig().getServletContext().getRequestDispatcher(
+								config.getPathMateria() + NOMBRE_DE_PAGINA);
+					    rd.forward(request,response);
+						
+					}
+					
 		
 				} catch (Exception e) {
 					Common.Error(e);
@@ -249,39 +256,141 @@ public class ModificaMat extends HttpServlet {
 	 * @param cveMat
 	 * @throws Exception
 	 */
-	private void ModificarMateria(HttpServletRequest request, String cveMat) throws Exception {
+	private boolean ModificarMateria(HttpServletRequest request, String cveMat) throws Exception {
 		Connection con = MySqlConnector.getConnection();
-		try {
-			con.setAutoCommit(false);
+		con.setAutoCommit(false);
+		File srcDir = null;
+		File destDir = null;
+		NivelGrado beanNivgrado = null;
 
-			String nivelval = request.getParameter(KEY_FORM_NIVEL);
+		Materia beanMatActual = Materia.Buscar(cveMat);
+		
+		
+		String nivelval = request.getParameter(KEY_FORM_NIVEL);
+		int nivelgrado = 0;
+		if(StringUtil.isNumber(request.getParameter(KEY_FORM_NIVEL_GRADO + nivelval))){
+			nivelgrado = Integer.parseInt(request.getParameter(KEY_FORM_NIVEL_GRADO + nivelval));
+		}
+		int modulo = Integer.parseInt(request.getParameter(KEY_FORM_SEMESTRE));
+
+		if((nivelgrado!= 0 && nivelgrado != beanMatActual.getNivelGrado()) || modulo != beanMatActual.getModulo()){
 			
-			Materia m = new Materia();
-			m.setCveMat(cveMat);
-			m.setNomMat(request.getParameter(KEY_FORM_NOM_MAT));
+			//Si se cambia nivelgrado o modulo, se mueve las carpetas de los contenidos.
 			
-			int nivelgrado = 0;
-			if(StringUtil.isNumber(request.getParameter(KEY_FORM_NIVEL_GRADO + nivelval))){
-				nivelgrado = Integer.parseInt(request.getParameter(KEY_FORM_NIVEL_GRADO + nivelval));
+			String pathMatActual = beanMatActual.GetPathMateriaAbsolute();
+			String pathMatNuevo = pathMatActual;
+			
+			if(nivelgrado!= 0 && nivelgrado != beanMatActual.getNivelGrado()){
+
+				beanNivgrado = NivelGrado.BuscarConCveNivGrado(nivelgrado);
+				pathMatNuevo = pathMatNuevo.replace(File.separator + beanMatActual.getNomGrado() + File.separator, 
+						File.separator + beanNivgrado.getNomGrado() + File.separator);
+
 			}
 			
-			m.setNivelGrado(nivelgrado);
-			
-			if(nivelgrado <= 0){
-				m.setNivel(Integer.parseInt(nivelval));
+			if(modulo != beanMatActual.getModulo()){
+				pathMatNuevo = pathMatNuevo.replace(File.separator + beanMatActual.getModulo() + File.separator, 
+						File.separator + modulo + File.separator);
+				
 			}
 			
-			m.setModulo(Integer.parseInt(request.getParameter(KEY_FORM_SEMESTRE)));
-//			m.setUnidad(Integer.parseInt(request.getParameter(KEY_FORM_UNIDAD)));
+				
+			srcDir = new File(pathMatActual);
+			destDir = new File(pathMatNuevo);
+			
+			if(srcDir.exists()){
+				
+				try{
+					FileUtils.moveDirectory(srcDir, destDir);
+				}catch(IOException ex){
+					request.setAttribute(KEY_VARIABLE_MESSAGE, Common.MENSAJE_ERROR_MOVER_CARPETA);
+					Common.Error(ex);
+					return false;
+				}
+			}
+			
+
+		}
+		
+		
+		Materia m = new Materia();
+		m.setCveMat(cveMat);
+		m.setNomMat(request.getParameter(KEY_FORM_NOM_MAT));
+		m.setNivelGrado(nivelgrado);
+		m.setModulo(modulo);
+		if(nivelgrado <= 0){
+			m.setNivel(Integer.parseInt(nivelval));
+		}
+		
+		
+		List<TrcnMat> listModificar = new ArrayList<TrcnMat>();
+		if((nivelgrado!= 0 && nivelgrado != beanMatActual.getNivelGrado()) || modulo != beanMatActual.getModulo()){
+			List<TrcnMat> listConts = TrcnMat.Buscar(cveMat);
+			
+			try{
+			
+				for(TrcnMat tmp : listConts){
+			
+					Clob myClob = con.createClob();
+			        String strContenido = tmp.getContenido();
+			        
+					if(nivelgrado!= 0 && nivelgrado != beanMatActual.getNivelGrado()){
+				        strContenido = strContenido.replaceAll(Common.SLASH + beanMatActual.getNomGrado() + Common.SLASH, 
+				        		Common.SLASH + beanNivgrado.getNomGrado() + Common.SLASH);
+	
+					}
+					
+					if(modulo != beanMatActual.getModulo()){
+				        strContenido = strContenido.replaceAll(Common.SLASH + beanMatActual.getModulo() + Common.SLASH + cveMat + Common.SLASH, 
+				        		Common.SLASH + modulo + Common.SLASH + cveMat + Common.SLASH);
+					}
+	
+			        if(!strContenido.equals(tmp.getContenido())){
+				        myClob.setString(1, strContenido);
+				        
+				        TrcnMat beanModif = new TrcnMat();
+				        beanModif.setMenuItem(tmp.getMenuItem());
+				        beanModif.setContenido(myClob);
+				        listModificar.add(beanModif);
+			        	
+			        }
+					
+				}
+			
+			}catch(Exception e){
+				if(destDir != null && srcDir != null){
+					FileUtils.moveDirectory(destDir,srcDir);
+				}
+
+				throw e;
+				
+			}
+		
+		}
+		
+		
+		try {
 			m.Modificar(con);
+			
+			for(TrcnMat beanModif : listModificar){
+				beanModif.Modificar(con);
+			}
 			
 			Common.InsertLogAct(request, con, usuario.getCveUsu(), MessageFormat.format(Common.TEXTO_ACTION_LOG_MATERIA_MODIFICAR, cveMat));
 			
 			con.commit();
+			
+			return true;
+			
 		} catch (Exception e) {
 			if (con != null) {
 				con.rollback();
 			}			
+
+			if(destDir != null && srcDir != null){
+				FileUtils.moveDirectory(destDir,srcDir);
+			}
+
 			throw e;
 		} finally{
 			if (con != null) {
@@ -450,7 +559,7 @@ public class ModificaMat extends HttpServlet {
 	 * @param request
 	 * @throws Exception
 	 */
-	private void SetForm(HttpServletRequest request, boolean hasError) throws Exception {
+	private void SetForm(HttpServletRequest request, boolean noError) throws Exception {
 				
 		String cveMat = request.getParameter(KEY_REQUEST_PARAM_CVEMAT);
 		if(cveMat == null){
@@ -482,7 +591,7 @@ public class ModificaMat extends HttpServlet {
 			try {
 	    		Materia m = Materia.Buscar(cveMat);
 	    		
-	    		if(hasError){
+	    		if(!noError){
 	    			m.setCveMat(request.getParameter(KEY_FORM_HIDDEN_CVE_MAT));
 	    			m.setNomMat(request.getParameter(KEY_FORM_NOM_MAT)); 
 	    			String nivel = request.getParameter(KEY_FORM_NIVEL);
@@ -520,7 +629,7 @@ public class ModificaMat extends HttpServlet {
 
 			try {
 	    		
-	    		if(hasError){
+	    		if(!noError){
 		    		Materia m = new Materia();
 	    			m.setCveMat(request.getParameter(KEY_FORM_CLAVE));
 	    			m.setNomMat(request.getParameter(KEY_FORM_NOM_MAT)); 

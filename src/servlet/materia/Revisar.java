@@ -1,15 +1,11 @@
 package servlet.materia;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.RequestDispatcher;
@@ -18,17 +14,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-//import org.apache.poi.hssf.usermodel.HSSFCell;
-//import org.apache.poi.hssf.usermodel.HSSFRow;
-//import org.apache.poi.hssf.usermodel.HSSFSheet;
-//import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-//import org.apache.poi.poifs.filesystem.POIFSFileSystem;
-//import org.apache.poi.ss.usermodel.Cell;
-//import org.apache.poi.ss.usermodel.Row;
-//import org.apache.poi.ss.usermodel.Sheet;
-//import org.apache.poi.ss.usermodel.Workbook;
-//import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import beans.*;
 import util.common.Common;
@@ -53,8 +38,6 @@ public class Revisar extends HttpServlet {
 	private final String KEY_VARIABLE_MESSAGE = "message";
 	/** Nombre del form del permiso **/
 	private final String KEY_VARIABLE_TIENE_AUTORIDAD = "tieneAutoridad";
-	/** Nombre del form del permiso **/
-	private final String KEY_VARIABLE_SOLICITAR = "solicitar";
 	/** Nombre del form del permiso **/
 	private final String KEY_VARIABLE_RADIO_REVISADO = "radioRevisado";
 	/** Nombre del form del permiso **/
@@ -135,9 +118,6 @@ public class Revisar extends HttpServlet {
 	 								
 					if(request.getParameter(KEY_FORM_HIDDEN_TIPO).equals("1")){
 						RevisarMateria(request);
-					}	
-					else if(request.getParameter(KEY_FORM_HIDDEN_TIPO).equals("2")){
-//						Imprimir(request, response);
 					}
 
 					SetForm(request);
@@ -162,28 +142,6 @@ public class Revisar extends HttpServlet {
 		
 	}
 	
-
-//	private void Imprimir(HttpServletRequest request, HttpServletResponse response) throws Exception {
-//		try{
-//			
-//			Workbook wb = WorkbookFactory.create(new File(
-//					this.getServletContext().getRealPath("/WEB-INF/" + "Revisar.xlsx")));
-//		    Sheet sheet = wb.getSheetAt(0);
-//		    Row row = sheet.createRow((short)0);
-//		    Cell cell = row.createCell(0);
-//		    cell.setCellValue("test revisar");			
-//
-//	        response.setHeader("Content-Disposition",
-//	                "attachment;filename=Revisar.xlsx");
-//	            response.setContentType("application/vnd.ms-excel");
-//	            wb.write(response.getOutputStream());
-//	            
-//	        wb.close();
-//	       
-//		}catch(Exception e){
-//			throw e;
-//		}
-//	}
 
 	private void RevisarMateria(HttpServletRequest request) throws Exception {
 		String cveMat = request.getParameter(KEY_FORM_HIDDEN_CVE_MAT);

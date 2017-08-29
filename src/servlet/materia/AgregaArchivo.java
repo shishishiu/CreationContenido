@@ -2,7 +2,6 @@ package servlet.materia;
 
 import java.io.*;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -185,32 +184,7 @@ public class AgregaArchivo extends HttpServlet {
 
 						
 		}
-		
-		
-//		Connection con = null;			
-//		try {
-//		    con = MySqlConnector.getConnection();			
-//			con.setAutoCommit(false);
-//
-//			Common.InsertLogAct(request, con, usuario.getCveUsu(), 
-//					MessageFormat.format(Common.TEXTO_ACTION_LOG_CONTENIDO_ARCHIVO_AGREGAR, filepath));
-//						
-//			con.commit();
-//
-//			Common.MsgJson("success", Common.MENSAJE_TERMINAR_PROCESO, response);
-//
-//		} catch (SQLException e) {
-//			if (con != null) {
-//				con.rollback();
-//			}			
-//			throw e;
-//		} finally{
-//			if (con != null) {
-//				con.setAutoCommit(true);
-//				con.close();
-//	        }			
-//		}		
-		
+				
 	}
 
 }

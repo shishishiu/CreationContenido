@@ -200,5 +200,36 @@ public class MateriaSolicitud implements Serializable {
 		}
 		return count;
 	}
+	
+	/**
+	 * Dar de baja
+	 * @param con
+	 * @param cvemat
+	 * @return
+	 * @throws SQLException
+	 */
+	public static int DarBajaLogical(Connection con, String cvemat) throws SQLException{
+		
+		PreparedStatement preparedStatement = null;
+		int count = 0;
+		try {			
+			String query = "UPDATE tblmateriasolicitud SET BanSolicitud =0 WHERE CveMat =?";
+			
+			preparedStatement = con.prepareStatement(query);
+			preparedStatement.setString(1, cvemat);
+			count = preparedStatement.executeUpdate();
+
+		} catch (SQLException e) {
+			throw e;
+		} finally{
+			if (preparedStatement != null) {
+				preparedStatement.close();
+	        }			
+		}
+		
+		return count;
+	}
+	
+
 
 }

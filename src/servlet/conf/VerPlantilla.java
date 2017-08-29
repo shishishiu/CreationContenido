@@ -83,7 +83,7 @@ public class VerPlantilla extends HttpServlet {
     		
     		usuario = new Usuario(request, response);
     		if(usuario.IsAutorizado()){
-    			if(usuario.isAdministrador() || usuario.isAdministradorGeneral()){
+    			if(usuario.isAdministradorGeneral()){
 	
   					request.setAttribute(KEY_VARIABLE_PUEDE_MOSTRAR, true);
 	    			Iniciar();
@@ -116,7 +116,7 @@ public class VerPlantilla extends HttpServlet {
     	
 			usuario = new Usuario(request, response);
     		if(usuario.IsAutorizado()){
-    			if(usuario.isAdministrador() || usuario.isAdministradorGeneral()){
+    			if(usuario.isAdministradorGeneral()){
 
     				String tipo = request.getParameter(KEY_HIDDEN_TIPO);
     				if(tipo.equals(KEY_TIPO_DOWNLOAD)){
@@ -159,7 +159,6 @@ public class VerPlantilla extends HttpServlet {
 		}
 		
 		String filepath = "";
-//		String pathWebInf = this.getServletContext().getRealPath(Common.PATH_WEB_INF);
 		Configuracion conf = new Configuracion();
 		String pathWebInf = conf.getAbsolutePath() + File.separator + conf.getPlantillas();
 		if(tipo.equals(KEY_TIPO_ARCHIVO_ENCABEZADO)){

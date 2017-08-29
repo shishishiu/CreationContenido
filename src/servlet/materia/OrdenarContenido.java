@@ -85,8 +85,6 @@ public class OrdenarContenido extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-		RequestDispatcher rd = null;	
-		
 		try {
     	
 			usuario = new Usuario(request, response);

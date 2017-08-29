@@ -19,8 +19,6 @@ import util.common.Common;
 import util.conf.Configuracion;
 import util.db.MySqlConnector;
 import util.string.StringUtil;
-
-import org.apache.commons.lang.StringEscapeUtils;
 /**
  * Servlet implementation class BusMat
  */
@@ -145,36 +143,11 @@ public class BusUsu extends HttpServlet {
     						
     					} else if(tipo.equals(KEY_TIPO_MOVER_PAGINA)){
 		        			currentPagina = GetCurrentPagina(request);
-							int numfrom = ((currentPagina-1)*Common.KEY_NUMERO_MOSTRAR);
+							int numfrom = ((currentPagina-1)*Common.NUMERO_DE_DATOS_PARA_MOSTRAR);
 							count = BuscarUsuario(request, numfrom);
 		        			request.setAttribute("paginas", Common.CreateListNumeroPagina(request, count, currentPagina));	    
     						
     					}
-    					
-    					
-    					
-//    					switch(tipo){
-//						case KEY_TIPO_BUSCAR:
-//							int count = BuscarUsuario(request,0);
-//		        			int currentPagina = GetCurrentPagina(request);
-//		        			request.setAttribute("paginas", Common.CreateListNumeroPagina(request, count, currentPagina));	    
-//		        			
-//							break;
-//						case KEY_TIPO_BAJA:
-//							DarBaja(request);
-//							break;
-//							
-//						case KEY_TIPO_MOVER_PAGINA:
-//							
-//		        			currentPagina = GetCurrentPagina(request);
-//							int numfrom = ((currentPagina-1)*Common.KEY_NUMERO_MOSTRAR);
-//							count = BuscarUsuario(request, numfrom);
-//		        			request.setAttribute("paginas", Common.CreateListNumeroPagina(request, count, currentPagina));	    
-//							
-//							break;
-//    						default:
-//    							break;
-//    					}
     					
     				}
 
@@ -304,7 +277,7 @@ public class BusUsu extends HttpServlet {
 		}
 			
 		try {
-			list = bean.Buscar(numfrom,Common.KEY_NUMERO_MOSTRAR);
+			list = bean.Buscar(numfrom,Common.NUMERO_DE_DATOS_PARA_MOSTRAR);
 			
 			cnt = bean.CountUsuario();
 			

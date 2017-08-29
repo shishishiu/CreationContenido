@@ -15,20 +15,19 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
 import beans.*;
 import util.common.Common;
 import util.conf.Configuracion;
 import util.db.MySqlConnector;
 
 /**
- * Servlet implementation class Validar
+ * Servlet implementation class Revision
  */
-@WebServlet("/Validar")
-public class Validar extends HttpServlet {
+@WebServlet("/EstaProduccion")
+public class EstaProduccion extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	/** Nombre de la página **/
-	private final String NOMBRE_DE_PAGINA = "Validar.jsp";
+	private final String NOMBRE_DE_PAGINA = "EstaProduccion.jsp";
 	/** Nombre del form de materias **/
 	private final String KEY_VARIABLE_MATERIA = "materia";
 	/** Nombre del form de materias **/
@@ -40,11 +39,9 @@ public class Validar extends HttpServlet {
 	/** Nombre del form del permiso **/
 	private final String KEY_VARIABLE_TIENE_AUTORIDAD = "tieneAutoridad";
 	/** Nombre del form del permiso **/
+	private final String KEY_VARIABLE_RADIO_ESTA_PRODUCCION = "radioEstaProduccion";
+	/** Nombre del form del permiso **/
 	private final String KEY_VARIABLE_RADIO_VALIDADO = "radioValidado";
-	/** Nombre del form del permiso **/
-	private final String KEY_VARIABLE_RADIO_SOLICITADO = "radioSolicitado";
-	/** Nombre del form del permiso **/
-	private final String KEY_VARIABLE_RADIO_PENDIENTE = "radioPendiente";
 	/** Nombre del form del cveMat **/
 	private final String KEY_REQUEST_PARAM_CVE_MAT = "cveMat";
 	/** Nombre del form **/
@@ -53,12 +50,8 @@ public class Validar extends HttpServlet {
 	private final String KEY_FORM_RESULTADO = "resultado";
 	/** Nombre del form **/
 	private final String KEY_FORM_HIDDEN_CVE_MAT = "hiddenCveMat";
-	/** Nombre del param **/
-	private final String KEY_TIPO_VALIDAR = "1";
-	/** Nombre del param **/
-	private final String KEY_TIPO_EXPORTAR_VALIDACION = "2";
-	/** Nombre del param **/
-	private final String KEY_TIPO_EXPORTAR = "3";
+	/** Nombre del form **/
+	private final String KEY_FORM_HIDDEN_TIPO = "hiddenTipo";
 
 	/** Usuario **/
 	public Usuario usuario;
@@ -66,7 +59,7 @@ public class Validar extends HttpServlet {
     /**
      * @see HttpServletHttpServlet()
      */
-    public Validar() {
+    public EstaProduccion() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -82,9 +75,8 @@ public class Validar extends HttpServlet {
     		usuario = new Usuario(request, response);
     		if(usuario.IsAutorizado()) {
 				if(usuario.getPerUsu() == Common.PERMISO_ADMINISTRADOR ||
-						usuario.getPerUsu() == Common.PERMISO_ADMINISTRADOR_GENERAL){
-	    			Iniciar();
-	    			SetForm(request);
+				 usuario.getPerUsu() == Common.PERMISO_ADMINISTRADOR_GENERAL){
+						SetForm(request);
 		    		
 		    		} else{
 		
@@ -92,10 +84,10 @@ public class Validar extends HttpServlet {
 		    			request.setAttribute(KEY_VARIABLE_MESSAGE, Common.MENSAJE_ERROR_AUTENTIFICA);
 		    		}
 
-			Configuracion config = new Configuracion();
-			rd = getServletConfig().getServletContext().getRequestDispatcher(
-					config.getPathMateria() + NOMBRE_DE_PAGINA);
-		    rd.forward(request,response);
+				Configuracion config = new Configuracion();
+				rd = getServletConfig().getServletContext().getRequestDispatcher(
+						config.getPathMateria() + NOMBRE_DE_PAGINA);
+			    rd.forward(request,response);
     		}
 
     	} catch (Exception e) {
@@ -104,57 +96,24 @@ public class Validar extends HttpServlet {
 		}
 	}
 
-	/**
-	 * Iniciar
-	 */
-	private void Iniciar() {
-	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		RequestDispatcher rd = null;	
-		Configuracion config = new Configuracion();
 		
 		try {
     	
 			usuario = new Usuario(request, response);
     		if(usuario.IsAutorizado()){
-				if(usuario.getPerUsu() == Common.PERMISO_ADMINISTRADOR || 
-						usuario.getPerUsu() == Common.PERMISO_ADMINISTRADOR_GENERAL){
-	 			
-					String cveMat = request.getParameter(KEY_FORM_HIDDEN_CVE_MAT);
-					String tipo = request.getParameter("hiddenTipo");
-
-					if(tipo.equals(KEY_TIPO_VALIDAR)){
-						ValidarMateria(request, response);
-						return;
-						
-					}else if(tipo.equals(KEY_TIPO_EXPORTAR_VALIDACION)){
-						if(!Common.Validacion(cveMat, response)){
-    						return;
-    					}
-						return;
-
-					}else if(tipo.equals(KEY_TIPO_EXPORTAR)){
-						Common.Exportar(request,cveMat,usuario );
-    					Materia mat = Materia.Buscar(cveMat);
-    					
-//    					if(Common.FTPCopiar(mat)){
-        				if(Common.Copiar(mat)){
-	    					request.setAttribute(KEY_VARIABLE_MESSAGE, MessageFormat.format(Common.MENSAJE_TERMINAR_PROCESO + Common.MENSAJE_URL_PRUEBA,config.getPruebaUrl())); 
-	    					request.setAttribute("flgOpenWindow", 1);
-	    					request.setAttribute("urlPrueba", config.getPruebaUrl());
-    					}else{
-    						request.setAttribute(KEY_VARIABLE_MESSAGE, Common.MENSAJE_ERROR + " cunado se copia por FTP");
-    					}
-						
-					}else{
-						return;
+				if(usuario.getPerUsu() == Common.PERMISO_ADMINISTRADOR ||
+	    		 usuario.getPerUsu() == Common.PERMISO_ADMINISTRADOR_GENERAL){
+	 								
+					if(request.getParameter(KEY_FORM_HIDDEN_TIPO).equals("1")){
+						Enviar(request);
 					}
-					
-					
+
 					SetForm(request);
 					
 	    		} else{
@@ -164,42 +123,33 @@ public class Validar extends HttpServlet {
 	    		}
 
     		
+				Configuracion config = new Configuracion();
 				rd = getServletConfig().getServletContext().getRequestDispatcher(
 						config.getPathMateria() + NOMBRE_DE_PAGINA);
 			    rd.forward(request,response);
-    		} else{
-				Common.MsgJson("error", Common.NOMBRE_DE_PAGINA_AUTENTIFICA_ERROR, response);
-    			return;
-
-    		}
+    		}    		
 		    
     	} catch (Exception e) {
 			Common.Error(e);
-			Common.MsgJson("error", Common.MENSAJE_ERROR, response);
-			if(!Common.IsAjax(request)){
-				response.sendRedirect(getServletConfig().getServletContext().getContextPath() + Common.getErrorPage());
-			}
+			response.sendRedirect(getServletConfig().getServletContext().getContextPath() + Common.getErrorPage());
 		}
 		
 	}
 	
-	private void ValidarMateria(HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+	private void Enviar(HttpServletRequest request) throws Exception {
 		String cveMat = request.getParameter(KEY_FORM_HIDDEN_CVE_MAT);
 		
-		if(Validacion(request, cveMat, response)){
+		if(Validacion(request, cveMat)){
 
-			InsertarSolicitud(request, cveMat, response);
-
-			int resultado = Integer.parseInt(request.getParameter(KEY_FORM_RESULTADO));
-			if(resultado == Common.ESTADO_DE_SOLICITUD_VALIDADO){
-				Common.CrearJSP(request, usuario, cveMat);
-				
-			}
-
+			InsertarSolicitud(request, cveMat);
+			
 		}
+		
+		
 	}
 
-	private boolean Validacion(HttpServletRequest request, String cveMat, HttpServletResponse response) throws Exception {
+	private boolean Validacion(HttpServletRequest request, String cveMat) throws Exception {
 		List<MateriaSolicitud> list = null;
 		
 		try {
@@ -208,11 +158,9 @@ public class Validar extends HttpServlet {
 			bean.setCveMat(cveMat);
 			list = bean.Buscar();
 			if(list.size()>0 && 
-					list.get(0).getEstadoSolicitud() != Common.ESTADO_DE_SOLICITUD_REVISADO){
+					list.get(0).getEstadoSolicitud() != Common.ESTADO_DE_SOLICITUD_LIBERADO){
 				
-				request.setAttribute(KEY_VARIABLE_MESSAGE, Common.MENSAJE_SOLICITAR_HA_VALIDADO);
-				Common.MsgJson("error", Common.MENSAJE_SOLICITAR_HA_VALIDADO, response);
-
+				request.setAttribute(KEY_VARIABLE_MESSAGE, Common.MENSAJE_SOLICITAR_HA_PRODUCCION);
 				return false;
 			
 			}
@@ -223,7 +171,8 @@ public class Validar extends HttpServlet {
 		return true;
 	}
 
-	private void InsertarSolicitud(HttpServletRequest request, String cveMat, HttpServletResponse response) throws Exception {
+
+	private void InsertarSolicitud(HttpServletRequest request, String cveMat) throws Exception {
 
 		Connection con = MySqlConnector.getConnection();
 		try {
@@ -241,13 +190,12 @@ public class Validar extends HttpServlet {
 			bean.Insertar(con);
 			
 			Common.InsertLogAct(request, con, usuario.getCveUsu(), 
-					MessageFormat.format(Common.TEXTO_ACTION_LOG_VALIDAR,cveMat));
+					MessageFormat.format(Common.TEXTO_ACTION_LOG_REVISAR,cveMat));
 	
 			
 			con.commit();
 			
-//			request.setAttribute(KEY_VARIABLE_MESSAGE, Common.MENSAJE_TERMINAR_PROCESO);
-			Common.MsgJson("success", Common.MENSAJE_TERMINAR_PROCESO, response);
+			request.setAttribute(KEY_VARIABLE_MESSAGE, Common.MENSAJE_TERMINAR_PROCESO);
 			
 		} catch (SQLException e) {
 			if (con != null) {
@@ -289,9 +237,8 @@ public class Validar extends HttpServlet {
 	
    			request.setAttribute(KEY_VARIABLE_TIENE_AUTORIDAD, true);
 
+			request.setAttribute(KEY_VARIABLE_RADIO_ESTA_PRODUCCION, Common.ESTADO_DE_SOLICITUD_PRODUCCION);
 			request.setAttribute(KEY_VARIABLE_RADIO_VALIDADO, Common.ESTADO_DE_SOLICITUD_VALIDADO);
-			request.setAttribute(KEY_VARIABLE_RADIO_SOLICITADO, Common.ESTADO_DE_SOLICITUD_SOLICITADO);
-			request.setAttribute(KEY_VARIABLE_RADIO_PENDIENTE, Common.ESTADO_DE_SOLICITUD_PENDIENTE);
 			
 		} catch (Exception e) {
 			throw e;

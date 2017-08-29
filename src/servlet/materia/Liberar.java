@@ -1,9 +1,6 @@
 package servlet.materia;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -24,8 +21,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
@@ -36,9 +36,10 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import beans.*;
-import servlet.general.PdfNewPage;
 import util.common.Common;
 import util.conf.Configuracion;
+import util.conf.PdfLiberarNewPage;
+import util.conf.PdfNewPage;
 import util.db.MySqlConnector;
 
 /**
@@ -62,8 +63,6 @@ public class Liberar extends HttpServlet {
 	/** Nombre del form del cveMat **/
 	private final String KEY_REQUEST_PARAM_CVE_MAT = "cveMat";
 	/** Nombre del form **/
-//	private final String KEY_FORM_NOTA = "nota";
-	/** Nombre del form **/
 	private final String KEY_FORM_NOTA2 = "nota2";
 	/** Nombre del form **/
 	private final String KEY_FORM_HIDDEN_CVE_MAT = "hiddenCveMat";
@@ -71,14 +70,14 @@ public class Liberar extends HttpServlet {
 	private final String KEY_TIPO_VALIDAR = "1";
 	/** Nombre del param **/
 	private final String KEY_TIPO_IMPRIMIR = "2";
-//	/** Nombre del param **/
-//	private final String KEY_TIPO_PREVIEW1 = "3";
 	/** Nombre del param **/
 	private final String KEY_TIPO_PREVIEW2 = "4";
 
 	/** Usuario **/
 	public Usuario usuario;
-	
+
+	Configuracion config = new Configuracion();
+
     /**
      * @see HttpServletHttpServlet()
      */
@@ -108,7 +107,6 @@ public class Liberar extends HttpServlet {
 		    			request.setAttribute(KEY_VARIABLE_MESSAGE, Common.MENSAJE_ERROR_AUTENTIFICA);
 		    		}
 
-			Configuracion config = new Configuracion();
 			rd = getServletConfig().getServletContext().getRequestDispatcher(
 					config.getPathMateria() + NOMBRE_DE_PAGINA);
 		    rd.forward(request,response);
@@ -152,20 +150,6 @@ public class Liberar extends HttpServlet {
 						return;
 					}
 					
-//					switch(tipo){
-//					case KEY_TIPO_VALIDAR:
-//						LiberarMateria(request, response);
-//						return;
-//					case KEY_TIPO_IMPRIMIR:
-//						Imprimir(request, response);
-//						return;
-//					case KEY_TIPO_PREVIEW2:
-//						ImprimirPreview(2, request, response);
-//						return;
-//					default:
-//						break;
-//					}
-
 					SetForm(request);
 					
 	    		} else{
@@ -175,7 +159,6 @@ public class Liberar extends HttpServlet {
 	    		}
 
     		
-				Configuracion config = new Configuracion();
 				rd = getServletConfig().getServletContext().getRequestDispatcher(
 						config.getPathMateria() + NOMBRE_DE_PAGINA);
 			    rd.forward(request,response);
@@ -284,76 +267,187 @@ public class Liberar extends HttpServlet {
 		
 		String cveMat = request.getParameter(KEY_FORM_HIDDEN_CVE_MAT);
 		Materia bean = Materia.Buscar(cveMat);
+		String spaceTab = "        ";
 
-		Document document = new Document(PageSize.LETTER, 50,50,160,50);
+		Document document = new Document(PageSize.LETTER, 50,50,110,10);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         try{
 	       
             PdfWriter writer = PdfWriter.getInstance(document,baos );
-	        PdfNewPage event = new PdfNewPage();
+            PdfLiberarNewPage event = new PdfLiberarNewPage();
 	        writer.setPageEvent(event);
 	        
 	        document.open();
-	
-	        //-----tabla de fecha 
-	        PdfPTable table = new PdfPTable(2);
-	        table.setTotalWidth(document.getPageSize().getWidth() - 300);
+	        
+	        //-----tabla de title
+	        PdfPTable table = new PdfPTable(1);
+	        table.setTotalWidth(document.getPageSize().getWidth() - 50);
 	        table.setLockedWidth(true);
-	        table.setHorizontalAlignment(Rectangle.ALIGN_RIGHT);
-	        PdfPCell cell = new PdfPCell(new Phrase("FECHA/HORA"));
-	        cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+	        table.setHorizontalAlignment(Rectangle.ALIGN_CENTER);
+	        
+	        Font fontTitle  = FontFactory.getFont("Century Gothic", 12, Font.BOLD);
+	        Font fontNormal  = FontFactory.getFont("Century Gothic", 10);
+	        PdfPCell cell = new PdfPCell(new Phrase("Identificación del Proyecto", fontTitle));
 	        cell.setHorizontalAlignment(Rectangle.ALIGN_CENTER);
+	        cell.setBorder(Rectangle.NO_BORDER);
+	        table.addCell(cell);
+	        table.setSpacingAfter(20);
+	        document.add(table);
+
+	        //-----tabla de title
+	        //-----tabla de fecha
+	        table = new PdfPTable(4);
+	        table.setTotalWidth(document.getPageSize().getWidth() - 50);
+	        table.setLockedWidth(true);
+	        cell = new PdfPCell(new Phrase("Fecha de Registro:", fontTitle));
+	        cell.setHorizontalAlignment(Rectangle.ALIGN_LEFT);
 	        table.addCell(cell);
 	
 			Date date = new Date();
-			SimpleDateFormat sdf1 = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-	        cell = new PdfPCell(new Phrase(sdf1.format(date) + " HRS."));
-	        cell.setHorizontalAlignment(Rectangle.ALIGN_CENTER);
+			SimpleDateFormat sdf1 = new SimpleDateFormat("dd/MMM/yyyy");
+	        cell = new PdfPCell(new Phrase(sdf1.format(date), fontNormal));
+	        cell.setHorizontalAlignment(Rectangle.ALIGN_LEFT);
+	        table.addCell(cell);
+	        
+	        cell = new PdfPCell(new Phrase("Hora de Registro:", fontTitle));
+	        cell.setHorizontalAlignment(Rectangle.ALIGN_LEFT);
+	        table.addCell(cell);
+	        
+	        date = new Date();
+			sdf1 = new SimpleDateFormat("HH:mm:ss");
+	        cell = new PdfPCell(new Phrase(sdf1.format(date) + " HRS.", fontNormal));
+	        cell.setHorizontalAlignment(Rectangle.ALIGN_LEFT);
 	        table.addCell(cell);
 	        table.setSpacingAfter(30);
-	
+	        
 	        document.add(table);
 	        
 	        //-----tabla de fecha
-	        //-----tabla de menu
-	        Configuracion conf = new Configuracion();
-	        String pathTemplate = conf.getAbsolutePath() + File.separator + conf.getPlantillas() + File.separator + "templateOficio1.txt";
+	        //-----tabla de contenido
+	        table = new PdfPTable(1);
+	        table.setTotalWidth(document.getPageSize().getWidth() - 50);
+	        table.setLockedWidth(true);
 	        
-			File fileTmp = new File(pathTemplate);
-	        FileReader filereader = new FileReader(fileTmp);
-	        BufferedReader br = new BufferedReader(filereader);
-	        String message = "";
-	        String str;
-	        while((str = br.readLine()) != null){
-	          message += str + "\r\n";
-	        }
-	        br.close();
+	          //-----row 1
+	        Paragraph para = new Paragraph("El C. ", fontNormal);
+
+	        Chunk chunk = new Chunk(usuario.getNomCompletoUsu(), fontNormal);
+	        chunk.setUnderline(1.5f, -2);
+	        para.add(chunk);
 	        
-	        String nombre = usuario.getNomCompletoUsu();
-	        String materia = bean.getNomNivel() + " " + bean.getNomMat();
+	        para.add(new Chunk(" "));
+
+	        chunk = new Chunk("Jefa del Departamento de Desarrollo Académico", fontNormal);
+	        chunk.setUnderline(0.5f, -2);
+	        para.add(chunk);
+
+	        para.add(new Chunk(" , acepta la terminación y entrega contenidos ", fontNormal));
+
+	        chunk = new Chunk(bean.getNomNivel() + " " + bean.getNomMat());
+	        chunk.setUnderline(0.5f, -2);
+	        para.add(chunk);
 	        
+	        para.add(new Chunk(" cumpliendo las siguientes cláusulas:" 
+	        + Common.NEW_LINE + Common.NEW_LINE + spaceTab 
+	        + "a) Los productos y soporte documental para la operación del sistema acordados y generados son:", fontNormal));
+	        
+	        cell = new PdfPCell();
+	        cell.setBorder(PdfPCell.NO_BORDER);
+	        cell.setPadding(5);
+	        cell.addElement(para);
+	        
+	        table.addCell(cell);
+	          //-----row 1
+	          //-----row 2
+	        
+	        String materiaInf = bean.getNomNivel() + " " + bean.getNomMat(); 
 	        String menu = bean.getCveMat() + "  " + bean.getNomMat() 
-	        + "\r\n" + bean.getNomNivel() + " Modulo " + bean.getModulo()
-	        + "\r\n" + TrcnMat.CreaMenuPDF(bean, 0, 0);
-	
-	        Paragraph prg = new Paragraph(MessageFormat.format(message,nombre,materia,menu,materia));
-	        prg.setIndentationLeft(20);
-	        prg.setAlignment(Rectangle.ALIGN_LEFT);
-	
-	        document.add(prg);
-	        //-----tabla de menu        
-	                
+	        + Common.NEW_LINE + bean.getNomNivel() + " Modulo " + bean.getModulo()
+	        + Common.NEW_LINE + TrcnMat.CreaMenuPDF(bean, 0, 0);
+
+	        PdfPTable innerTable = new PdfPTable(1);
+	        PdfPCell innerCell = new PdfPCell(new Phrase(materiaInf, fontNormal));
+	        innerCell.setBorder(PdfPCell.NO_BORDER);
+	        innerTable.addCell(innerCell);
+	        innerCell = new PdfPCell(new Phrase(menu, fontNormal));
+	        innerCell.setBorder(PdfPCell.NO_BORDER);
+	        innerTable.addCell(innerCell);
+	        
+	        cell = new PdfPCell();
+	        cell.setBorder(PdfPCell.NO_BORDER);
+	        cell.setPadding(5);
+	        cell.addElement(innerTable);
+	        table.addCell(cell);
+	        cell.addElement(innerTable);
+	          //-----row 2
+
+	          //-----row 3
+	        cell = new PdfPCell(new Phrase(spaceTab + "b) Bajo las siguientes condiciones de entrega:", fontNormal));
+	        cell.setBorder(PdfPCell.NO_BORDER);
+	        cell.setPadding(5);
+	        table.addCell(cell);
+	          //-----row 3
+
+	          //-----row 4
+	        para = new Paragraph(spaceTab + spaceTab 
+	        		+ "Se hace entrega de la siguientes contenidos:" 
+	        		+ Common.NEW_LINE + spaceTab + spaceTab + spaceTab, fontNormal);
+	        chunk = new Chunk(materiaInf, fontNormal);
+	        chunk.setUnderline(0.5f, -2);
+	        para.add(chunk);
+	        
+	        para.add(new Chunk(Common.NEW_LINE + Common.NEW_LINE + spaceTab + spaceTab 
+	        		+ "Los módulos liberados satisfacen con los requerimientos de manera precisa, es flexible,"
+	        		+ Common.NEW_LINE + spaceTab + spaceTab 
+	        		+ "funcional y satisface las necesidades y se acepta la migración a producción."
+	        		+ Common.NEW_LINE + Common.NEW_LINE, fontNormal));
+	        
+	        para.add(new Chunk(spaceTab + spaceTab + 
+	        		"Se pondrá en producción a partir del día 11 de Julio del presente año en el siguiente servidor" 
+	        		+ Common.NEW_LINE + spaceTab + spaceTab 
+	        		+ "de producción alojado en la siguiente URL: "));
+
+	        Font blue  = FontFactory.getFont("Century Gothic", 10, BaseColor.BLUE);
+        	chunk = new Chunk(config.getPruebaUrl(), blue);
+	        chunk.setUnderline(0.5f, -2);
+	        para.add(chunk);
+	        para.add(new Chunk(Common.NEW_LINE + Common.NEW_LINE));
+	        
+
+	        para.add(new Chunk(Common.NEW_LINE + Common.NEW_LINE));
+
+	        
+	        
+	        cell = new PdfPCell();
+	        cell.setBorder(PdfPCell.NO_BORDER);
+	        cell.setPadding(5);
+	        cell.addElement(para);
+	        
+	        table.addCell(cell);
+	        table.setSpacingAfter(5);
+	          //-----row 4
+	        
+	        document.add(table);
+	        //-----tabla de contenido
+	        
+	        
+	        float currentY = writer.getVerticalPosition(false);
+	        if(currentY < 150.0){
+	        	document.newPage();
+	        }
+        
+	        	                
 	        //-----tabla de firma
+	        Font fontFirma  = FontFactory.getFont("Century Gothic", 9, Font.BOLD);
 	        float[] columnWidths = {20, 1, 20};
 	        PdfPTable tableFirma = new PdfPTable(columnWidths);
 	        tableFirma.setTotalWidth(document.getPageSize().getWidth() - 50);
 	        tableFirma.setLockedWidth(true);
-	        tableFirma.setSpacingBefore(30);
 	        
-	        PdfPCell cellOne = new PdfPCell(new Phrase("Nombre y Firma"));
-	        PdfPCell cellTwo = new PdfPCell(new Phrase("Nombre y Firma"));
+	        PdfPCell cellOne = new PdfPCell(new Phrase("Nombre y Firma", fontFirma));
+	        PdfPCell cellTwo = new PdfPCell(new Phrase("Nombre y Firma", fontFirma));
 	        PdfPCell cellBlank = new PdfPCell(new Phrase(""));
 	        
 	        cellOne.setBorder(Rectangle.NO_BORDER);
@@ -374,21 +468,27 @@ public class Liberar extends HttpServlet {
 	        cellOne.setBorder(Rectangle.BOTTOM);
 	        cellTwo.setBorder(Rectangle.NO_BORDER);
 	        cellTwo.setBorder(Rectangle.BOTTOM);
-	
+
 	        tableFirma.addCell(cellOne);
 	        tableFirma.addCell(cellBlank);
 	        tableFirma.addCell(cellTwo);
 	        
-	        PdfPCell cellOne2 = new PdfPCell(new Phrase(usuario.getNomCompletoUsu() + "\r\n"
-	        		+ "JEFA DEL DEPARTAMENTO DE DESARROLLO ACADÉMICO"));
+	        
+	        String jefe1Nombre = config.getJefe1Nombre();
+	        if(jefe1Nombre == null || jefe1Nombre.equals("")){
+	        	jefe1Nombre = usuario.getNomCompletoUsu().toUpperCase();
+	        }
+	        
+	        PdfPCell cellOne2 = new PdfPCell(new Phrase(jefe1Nombre 
+	        		+ Common.NEW_LINE + config.getJefe1Departamento(), fontFirma));
 	        cellOne2.setBorder(Rectangle.NO_BORDER);
 	        cellOne2.setHorizontalAlignment(Rectangle.ALIGN_CENTER);
 	        tableFirma.addCell(cellOne2);
 	
 	        tableFirma.addCell(cellBlank);
 	
-	        PdfPCell cellTwo2 = new PdfPCell(new Phrase("ING.JORGE HERNÁNDEZ VALDÍN" + "\r\n"
-	        		+ "JEFE DEL DEPARTAMENTO DE DESARROLLO Y PRODUCCIÓN DE CONTENIDOS VIRTUALES"));
+	        PdfPCell cellTwo2 = new PdfPCell(new Phrase(config.getJefe2Nombre()
+	        		+ Common.NEW_LINE + config.getJefe2Departamento(), fontFirma));
 	        cellTwo2.setBorder(Rectangle.NO_BORDER);
 	        cellTwo2.setHorizontalAlignment(Rectangle.ALIGN_CENTER);
 	        tableFirma.addCell(cellTwo2);
@@ -742,7 +842,7 @@ public class Liberar extends HttpServlet {
         table.addCell(cell);
         
         cell = new PdfPCell(new Phrase(bean.getCveMat() + "  " + bean.getNomMat() 
-        + "\r\n" + bean.getNomNivel() + " Modulo " + bean.getModulo()));
+        + Common.NEW_LINE + bean.getNomNivel() + " Modulo " + bean.getModulo()));
         cell.setBorder(Rectangle.LEFT | Rectangle.RIGHT);
         table.addCell(cell);
 
@@ -779,9 +879,9 @@ public class Liberar extends HttpServlet {
 
         String nota2 = request.getParameter(KEY_FORM_NOTA2);
         
-        while(nota2.indexOf("\r\n")>=0){
+        while(nota2.indexOf(Common.NEW_LINE)>=0){
 
-        	int i = nota2.indexOf("\r\n");
+        	int i = nota2.indexOf(Common.NEW_LINE);
         	String str = nota2.substring(0,i);
         	nota2 = nota2.substring(i+1);
         	
@@ -838,16 +938,22 @@ public class Liberar extends HttpServlet {
         tableFirma.addCell(cellBlank);
         tableFirma.addCell(cellTwo);
         
-        PdfPCell cellOne2 = new PdfPCell(new Phrase(usuario.getNomCompletoUsu() + "\r\n"
-        		+ "JEFA DEL DEPARTAMENTO DE DESARROLLO ACADÉMICO"));
+
+        String jefe1Nombre = config.getJefe1Nombre();
+        if(jefe1Nombre == null || jefe1Nombre.equals("")){
+        	jefe1Nombre = usuario.getNomCompletoUsu().toUpperCase();
+        }
+
+        PdfPCell cellOne2 = new PdfPCell(new Phrase(jefe1Nombre + Common.NEW_LINE
+        		+ config.getJefe1Departamento()));
         cellOne2.setBorder(Rectangle.NO_BORDER);
         cellOne2.setHorizontalAlignment(Rectangle.ALIGN_CENTER);
         tableFirma.addCell(cellOne2);
 
         tableFirma.addCell(cellBlank);
 
-        PdfPCell cellTwo2 = new PdfPCell(new Phrase("ING.JORGE HERNÁNDEZ VALDÍN" + "\r\n"
-        		+ "JEFE DEL DEPARTAMENTO DE DESARROLLO Y PRODUCCIÓN DE CONTENIDOS VIRTUALES"));
+        PdfPCell cellTwo2 = new PdfPCell(new Phrase(config.getJefe2Nombre() + Common.NEW_LINE
+        		+ config.getJefe2Departamento()));
         cellTwo2.setBorder(Rectangle.NO_BORDER);
         cellTwo2.setHorizontalAlignment(Rectangle.ALIGN_CENTER);
         tableFirma.addCell(cellTwo2);
@@ -910,7 +1016,6 @@ public class Liberar extends HttpServlet {
 
 			MateriaSolicitud bean = new MateriaSolicitud();
 			bean.setCveMat(cveMat);
-//			bean.setNota(request.getParameter(KEY_FORM_NOTA));
 			bean.setEstadoSolicitud(Common.ESTADO_DE_SOLICITUD_LIBERADO);
 			bean.setResultado(Common.ESTADO_DE_SOLICITUD_LIBERADO);
 			bean.setUsuarioSolicitud(usuario.getCveUsu());
@@ -972,5 +1077,4 @@ public class Liberar extends HttpServlet {
 		
 	}
 	
-
 }

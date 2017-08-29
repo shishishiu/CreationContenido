@@ -66,11 +66,15 @@ public class Configuracion {
 	/** Nombre del key de config **/
     private final String PATHFILE_USUARIO = "pathFile_usuario";
 	/** Nombre del key de config **/
+    private final String PATHFILE_REPORTE = "pathFile_reporte";
+	/** Nombre del key de config **/
     private final String PATHFILE_CONF = "pathFile_conf";
 	/** Nombre del key de config **/
-//    private static final String USERFILES_ABSOLUTE_PATH= "userfiles_absolute_path";
+    private final String ABSOLUTE_PATH= "absolute_path_crecont";
 	/** Nombre del key de config **/
-    private final String ABSOLUTE_PATH= "absolute_path";
+    private final String ABSOLUTE_PATH_BAC= "absolute_path_bac";
+	/** Nombre del key de config **/
+    private final String ABSOLUTE_PATH_LIC= "absolute_path_lic";
 	/** Nombre del key de config **/
     private final String USERFILES = "userfiles";
 	/** Nombre del key de config **/
@@ -90,6 +94,16 @@ public class Configuracion {
     /** Nombre del key de config **/
     private final String FTP_LIC_PASSWORD = "ftp_lic_password";
 
+    /** Nombre del key de config **/
+    private final String JEFE_1_NOMBRE = "jefe_1_nombre";
+    /** Nombre del key de config **/
+    private final String JEFE_1_DEPARTAMENTO = "jefe_1_departamento";
+    /** Nombre del key de config **/
+    private final String JEFE_2_NOMBRE = "jefe_2_nombre";
+    /** Nombre del key de config **/
+    private final String JEFE_2_DEPARTAMENTO = "jefe_2_departamento";
+
+    
     public Configuracion(){
     	Initialize();
     }
@@ -164,11 +178,20 @@ public class Configuracion {
 	public String getPathUsuario(){
 		return getPathFileRoot() + prop.getProperty(PATHFILE_USUARIO);
 	}
+	public String getPathReporte(){
+		return getPathFileRoot() + prop.getProperty(PATHFILE_REPORTE);
+	}
 	public String getPathConf(){
 		return getPathFileRoot() + prop.getProperty(PATHFILE_CONF);
 	}
 	public String getAbsolutePath(){
 		return prop.getProperty(ABSOLUTE_PATH);
+	}
+	public String getAbsolutePathBac(){
+		return prop.getProperty(ABSOLUTE_PATH_BAC);
+	}
+	public String getAbsolutePathLic(){
+		return prop.getProperty(ABSOLUTE_PATH_LIC);
 	}
 	public String getUserfilesAbsolutePath(){
 		return prop.getProperty(ABSOLUTE_PATH) + File.separator + prop.getProperty(USERFILES);
@@ -195,6 +218,20 @@ public class Configuracion {
 		return prop.getProperty(PLANTILLAS);
 	}
 
+	public String getJefe1Nombre(){
+		return prop.getProperty(JEFE_1_NOMBRE);
+	}
+	public String getJefe1Departamento(){
+		return prop.getProperty(JEFE_1_DEPARTAMENTO);
+	}
+	public String getJefe2Nombre(){
+		return prop.getProperty(JEFE_2_NOMBRE);
+	}
+	public String getJefe2Departamento(){
+		return prop.getProperty(JEFE_2_DEPARTAMENTO);
+	}
+
+	
 	private void Initialize() {
 	    prop = new Properties();
 	    
@@ -218,9 +255,10 @@ public class Configuracion {
 		while(e.hasMoreElements()){
 			
 			String key = e.nextElement().toString();
-			if(key.equals(PATHFILE_CONF) || key.equals(PATHFILE_MATERIA) || key.equals(PATHFILE_ROOT) || key.equals(PATHFILE_USUARIO)
-					|| key.equals(USERFILES) || key.equals(USERFILES_PATH) || key.equals(ABSOLUTE_PATH) || key.equals(PLANTILLAS)){
+			
+			if(key.matches("pathFile_.*") || key.matches("userfiles.*")|| key.equals(PLANTILLAS)){
 				continue;
+				
 			}
 			
 			list.add(key);

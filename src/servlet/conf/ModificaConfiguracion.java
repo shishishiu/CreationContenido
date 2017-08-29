@@ -1,18 +1,6 @@
 package servlet.conf;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.text.MessageFormat;
-import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.RequestDispatcher;
@@ -22,17 +10,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-
-import beans.Nivel;
 import beans.Usuario;
 import util.common.Common;
 import util.conf.Configuracion;
-import util.db.MySqlConnector;
-import util.string.StringUtil;
 
 /**
  * Servlet implementation class ModificaPlantilla
@@ -75,7 +55,7 @@ public class ModificaConfiguracion extends HttpServlet {
     		usuario = new Usuario(request, response);
     		if(usuario.IsAutorizado()){
 
-    			if(usuario.isAdministrador() || usuario.isAdministradorGeneral()){
+    			if(usuario.isAdministradorGeneral()){
         			
    					request.setAttribute(KEY_VARIABLE_PUEDE_MOSTRAR, true);
         			SetForm(request);
@@ -108,7 +88,7 @@ public class ModificaConfiguracion extends HttpServlet {
     	
 			usuario = new Usuario(request, response);
     		if(usuario.IsAutorizado()){
-    			if(usuario.isAdministrador() || usuario.isAdministradorGeneral()){
+    			if(usuario.isAdministradorGeneral()){
         			
         			Modificar(request, response);
 

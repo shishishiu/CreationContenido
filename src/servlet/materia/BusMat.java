@@ -20,8 +20,6 @@ import util.common.CustomException;
 import util.conf.Configuracion;
 import util.db.MySqlConnector;
 import util.string.StringUtil;
-
-import org.apache.commons.lang.StringEscapeUtils;
 /**
  * Servlet implementation class BusMat
  */
@@ -48,8 +46,6 @@ public class BusMat extends HttpServlet {
 	private final String KEY_VARIABLE_NOMBRE = "nombre";
 	/** Nombre del form del clave **/
 	private final String KEY_VARIABLE_MODULO = "modulo";
-	/** Nombre del form del nombre **/
-//	private final String KEY_VARIABLE_UNIDAD = "unidad";
 	/** Nombre del form de nombre **/
 	private final String KEY_VARIABLE_SOLICITUDES = "solicitudes";
 	/** Nombre del form del usuario **/
@@ -100,6 +96,8 @@ public class BusMat extends HttpServlet {
 	private final String KEY_TIPO_BUSCAR = "5";
 	/** Nombre del param**/
 	private final String KEY_TIPO_PRODUCCION = "6";
+	/** Nombre del param**/
+	private final String KEY_TIPO_REGRESAR_PENDIENTE = "7";
 	/** Nombre del form **/
 	private final String KEY_FORM_HIDDEN_CVE_MAT = "hiddenCveMat";
 	/** Nombre del param de dar de baja **/
@@ -179,7 +177,7 @@ public class BusMat extends HttpServlet {
     			request.setAttribute(KEY_VARIABLE_USUARIO, usuario);
 			
     			int currentPagina = GetCurrentPagina(request);
-				int numfrom = ((currentPagina-1)*Common.KEY_NUMERO_MOSTRAR);
+				int numfrom = ((currentPagina-1)*Common.NUMERO_DE_DATOS_PARA_MOSTRAR);
 
 				String tipo = request.getParameter(KEY_HIDDEN_TIPO);
 				if(tipo != null){
@@ -204,9 +202,8 @@ public class BusMat extends HttpServlet {
 
     					Materia mat = Materia.Buscar(cveMat);
     					
-    					if(Common.FTPCopiar(mat)){
-	    					request.setAttribute(KEY_VARIABLE_MESSAGE, Common.MENSAJE_TERMINAR_PROCESO + 
-	    							" URL de prueba es <a target='_blank' href='"+ config.getPruebaUrl() + "'>" + config.getPruebaUrl() + "</a>");
+    					if(Common.Copiar(mat)){
+	    					request.setAttribute(KEY_VARIABLE_MESSAGE, MessageFormat.format(Common.MENSAJE_TERMINAR_PROCESO + Common.MENSAJE_URL_PRUEBA,config.getPruebaUrl())); 
 
     					}else{
     						request.setAttribute(KEY_VARIABLE_MESSAGE, Common.MENSAJE_ERROR + " cunado se copia por FTP");
@@ -217,6 +214,8 @@ public class BusMat extends HttpServlet {
 
 					} else if(tipo.equals(KEY_TIPO_PRODUCCION)){
 						EstaProduccion(request);
+					} else if(tipo.equals(KEY_TIPO_REGRESAR_PENDIENTE)){
+						RegresarPendiente(request);
 					}
 					
 					
@@ -236,6 +235,49 @@ public class BusMat extends HttpServlet {
     	} catch (Exception e) {
 			Common.Error(e);
 			response.sendRedirect(getServletConfig().getServletContext().getContextPath() + Common.getErrorPage());
+		}
+		
+	}
+
+	private void RegresarPendiente(HttpServletRequest request) throws Exception {
+		String cveMat = request.getParameter(KEY_REQUEST_PARAM_CVE_MAT);
+		
+		InsertarSolicitudPendiente(request, cveMat);
+		
+	}
+
+	private void InsertarSolicitudPendiente(HttpServletRequest request, String cveMat) throws Exception {
+
+		Connection con = MySqlConnector.getConnection();
+		try {
+			con.setAutoCommit(false);
+			
+			MateriaSolicitud bean = new MateriaSolicitud();
+			bean.setCveMat(cveMat);
+			bean.setResultado(0);
+			bean.setEstadoSolicitud(0);
+			bean.setUsuarioSolicitud(usuario.getCveUsu());
+			
+			bean.Insertar(con);
+			
+			Common.InsertLogAct(request, con, usuario.getCveUsu(), 
+					MessageFormat.format(Common.TEXTO_ACTION_LOG_REGRESAR_PENDIENTE,cveMat));
+	
+			
+			con.commit();
+			
+			request.setAttribute(KEY_VARIABLE_MESSAGE, Common.MENSAJE_TERMINAR_PROCESO);
+			
+		} catch (SQLException e) {
+			if (con != null) {
+				con.rollback();
+			}			
+			throw e;
+		} finally{
+			if (con != null) {
+				con.setAutoCommit(true);
+				con.close();
+	        }			
 		}
 		
 	}
@@ -383,9 +425,6 @@ public class BusMat extends HttpServlet {
 			String nombre = Common.htmlEscape(request.getParameter(KEY_VARIABLE_NOMBRE));
 			request.setAttribute(KEY_VARIABLE_NOMBRE, nombre);
 	
-//			String unidad = StringEscapeUtils.escapeHtml(request.getParameter(KEY_VARIABLE_UNIDAD));
-//			request.setAttribute(KEY_VARIABLE_UNIDAD, unidad);
-
 			if(this.listaNivel == null){
 					this.listaNivel = CrearComboNivel();
 			}
@@ -526,14 +565,10 @@ public class BusMat extends HttpServlet {
 		}		
 		mat.setModulo(modulo);
 
-//		str = request.getParameter(KEY_VARIABLE_UNIDAD);
-//		if(StringUtil.isNumber(str)){
-//			mat.setUnidad(Integer.parseInt(str));
-//		}
-			
+		
 		try {
 			
-			list = mat.Buscar(usuario, numfrom,Common.KEY_NUMERO_MOSTRAR);
+			list = mat.Buscar(usuario, numfrom,Common.NUMERO_DE_DATOS_PARA_MOSTRAR);
 			count = mat.CountMateria(usuario);
 			
 		} catch (Exception e) {

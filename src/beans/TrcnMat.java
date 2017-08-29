@@ -630,11 +630,24 @@ public class TrcnMat implements Serializable {
 	 * @throws Exception
 	 */
 	public static List<TrcnMat> Buscar(String cveMat) throws Exception{
+		
+		return Buscar(cveMat, false);
+		
+	}
+	
+	public static List<TrcnMat> Buscar(String cveMat, boolean conDeleted) throws Exception{
 		List<TrcnMat> list = new ArrayList<TrcnMat>();
 		Connection con = null;
 		PreparedStatement preparedStatement = null;
 		try {			
-			String query = BUS_QUERY + " WHERE A.Materia =? AND menu_item_ban = 1 "
+			
+			String queryItemBan = " AND menu_item_ban =1 ";
+			if(conDeleted){
+				queryItemBan = "";
+			}
+			
+			
+			String query = BUS_QUERY + " WHERE A.Materia =? " + queryItemBan
 					+ "ORDER BY menu_item_parent_id,"
 					+ "	    CASE WHEN A.orden <= 0 THEN A.menu_item"
 					+ "          WHEN A.orden > 0 THEN A.orden END";

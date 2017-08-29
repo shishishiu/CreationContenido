@@ -12,7 +12,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import beans.*;
 import util.common.Common;
@@ -165,7 +164,7 @@ public class ModificaPermisoContenido extends HttpServlet {
 		PermisoContenido bean = new PermisoContenido();
 		bean.setCveMat(cveMat);
 		try {
-			this.listaUsuarioContenido = bean.Buscar(numfrom, Common.KEY_NUMERO_MOSTRAR_PAGINA); 
+			this.listaUsuarioContenido = bean.Buscar(numfrom, Common.NUMERO_DE_DATOS_PARA_MOSTRAR); 
 			return listaUsuarioContenido;
 		} catch (Exception e) {
 			throw e;
@@ -252,7 +251,7 @@ public class ModificaPermisoContenido extends HttpServlet {
 			
 			
 			int currentPagina = GetCurrentPagina(request);
-			int numfrom = ((currentPagina-1)*Common.KEY_NUMERO_MOSTRAR);
+			int numfrom = ((currentPagina-1)*Common.NUMERO_DE_DATOS_PARA_MOSTRAR);
 			PermisoContenido bean = new PermisoContenido();
 			bean.setCveMat(cveMat);
 			int count = bean.CountUsuariosContenidos();

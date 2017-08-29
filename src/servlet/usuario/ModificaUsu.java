@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import beans.MstCode;
 import beans.Usuario;
 import util.common.Common;
+import util.common.Crypto;
 import util.conf.Configuracion;
 import util.db.MySqlConnector;
 
@@ -217,10 +218,10 @@ public class ModificaUsu extends HttpServlet {
 				message += "Ingresa el permiso, por favor <br>";
 			}
 
-			if(request.getParameter(KEY_FORM_CONTRASENA) == null || request.getParameter(KEY_FORM_CONTRASENA).equals("")){
-				message += "Ingresa la contraseña, por favor <br>";
-			} else if(request.getParameter(KEY_FORM_CONTRASENA).length() > 21){
-				message += "Ingresa menos de 21 letras en la contraseña, por favor<br>";
+			if(request.getParameter(KEY_FORM_CONTRASENA) != null || !request.getParameter(KEY_FORM_CONTRASENA).equals("")){
+				if(request.getParameter(KEY_FORM_CONTRASENA).length() > 21){
+					message += "Ingresa menos de 21 letras en la contraseña, por favor<br>";
+				}
 			}
 
 
@@ -244,6 +245,10 @@ public class ModificaUsu extends HttpServlet {
 	private void Modificar(HttpServletRequest request, String cveUsu) throws Exception {
 		Connection con = MySqlConnector.getConnection();
 		try {
+
+			String password = request.getParameter(KEY_FORM_CONTRASENA);
+			String passwordCrypto = "";
+			
 			con.setAutoCommit(false);
 
 			Usuario bean = Usuario.Buscar(cveUsu);
@@ -251,7 +256,12 @@ public class ModificaUsu extends HttpServlet {
 			bean.setNomPatUsu(request.getParameter(KEY_FORM_NOM_PAT));
 			bean.setNomMatUsu(request.getParameter(KEY_FORM_NOM_MAT));
 			bean.setPerUsu(Integer.parseInt(request.getParameter(KEY_FORM_PERMISO)));
-			bean.setPwsUsu(request.getParameter(KEY_FORM_CONTRASENA));
+			
+			if(password != null && !password.equals("")){
+				passwordCrypto = Crypto.getStretchedPassword(password, cveUsu);
+				bean.setPwsUsu(passwordCrypto);
+			}
+
 
 			bean.Modificar(con);
 			
@@ -284,6 +294,12 @@ public class ModificaUsu extends HttpServlet {
 		Connection con = MySqlConnector.getConnection();
 
 		try {
+			
+			String password = request.getParameter(KEY_FORM_CONTRASENA);
+			String userId = request.getParameter(KEY_FORM_CLAVE);
+			String passwordCrypto = Crypto.getStretchedPassword(password, userId);
+			
+			
 			con.setAutoCommit(false);
 
 			Usuario bean = new Usuario();
@@ -292,7 +308,7 @@ public class ModificaUsu extends HttpServlet {
 			bean.setNomPatUsu(request.getParameter(KEY_FORM_NOM_PAT));
 			bean.setNomMatUsu(request.getParameter(KEY_FORM_NOM_MAT));
 			bean.setPerUsu(Integer.parseInt(request.getParameter(KEY_FORM_PERMISO)));
-			bean.setPwsUsu(request.getParameter(KEY_FORM_CONTRASENA));
+			bean.setPwsUsu(passwordCrypto);
 			
 			bean.Insertar(con);
 			
@@ -376,6 +392,8 @@ public class ModificaUsu extends HttpServlet {
 				bean.setPerUsu(Integer.parseInt(request.getParameter(KEY_FORM_PERMISO)));
 				request.setAttribute(KEY_VARIABLE_USU, bean);			
 				SetSelected(bean.getPerUsu());    		
+			} else{
+				SetSelected(Common.PERMISO_USUARIO_NORMAL);
 			}
 			
 

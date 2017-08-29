@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.FileUtils;
+
 import beans.*;
 import util.common.Common;
 import util.conf.Configuracion;
@@ -137,11 +139,9 @@ public class AgregaCarpeta extends HttpServlet {
 		String dirName = pathMat + File.separator + pathDirectory;
 		File dir = new File(dirName);
 		if(!dir.exists()){
-		    if (dir.mkdir()){
-		    }else{
-		    	Common.MsgJson("error", Common.MENSAJE_ERROR_FILE_NO_CREAR, response);
-		    	return;
-		    }
+			
+			FileUtils.forceMkdir(dir);
+			
 		}
 		
 		File newfile = new File(dirName + File.separator + nombreNewCarpeta);

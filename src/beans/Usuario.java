@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import util.common.Common;
+import util.common.Crypto;
 import util.db.DbUtil;
 import util.db.MySqlConnector;
 
@@ -215,13 +216,16 @@ public class Usuario {
 	public boolean ExistirUsuario(String idUsuario, String password) throws SQLException{
 		Connection con = null;
 		PreparedStatement preparedStatement = null;
+		
+		String passwordDescrypto = Crypto.getStretchedPassword(password, idUsuario);
+		
 		try {			
 			String query = this.queryBuscar1 + " AND PwsUsu =?";  
 				 
 			con = MySqlConnector.getConnection();
 			preparedStatement = con.prepareStatement(query);
 			preparedStatement.setString(1, idUsuario);
-			preparedStatement.setString(2, password);
+			preparedStatement.setString(2, passwordDescrypto);
 			ResultSet rs = preparedStatement.executeQuery();
 
 			if(rs.next()){
@@ -352,6 +356,7 @@ public class Usuario {
 				u.nomPatUsu = rs.getString("nomPatUsu");
 				u.nomMatUsu = rs.getString("nomMatUsu");
 				u.perUsu = rs.getInt("perUsu");
+				u.perUsuNombre = rs.getString("PerUsuNombre");
 				u.pwsUsu = rs.getString("pwsUsu");
 				u.banUsu = rs.getInt("banUsu");	
  			}
@@ -480,21 +485,9 @@ public class Usuario {
 			
 			String nombreCondi = "";
 			if(this.nomUsu != null && this.nomUsu.length() > 0){
-				nombreCondi = " u.nomUsu LIKE ? ";
-			}
-			if(this.nomMatUsu != null && this.nomMatUsu.length() > 0){
-				if(nombreCondi.length() > 0){ nombreCondi += " OR ";}
-				nombreCondi += " u.nomMatUsu LIKE ? ";
-			}
-			if(this.nomPatUsu != null && this.nomPatUsu.length() > 0){
-				if(nombreCondi.length() > 0){ nombreCondi += " OR ";}
-				nombreCondi += " u.nomPatUsu LIKE ? ";
-			}
-
-			if(nombreCondi.length() > 0){
-				nombreCondi = "(" + nombreCondi + ")";
 				if(condicion.length() > 0){ condicion.append(" AND ");}
-				condicion.append(nombreCondi);
+				condicion.append(" (REPLACE(CONCAT(IFNULL(u.NomUsu, ''), IFNULL(u.NomPatUsu, ''), IFNULL(u.NomMatUsu,'')),' ','') like ?) ");
+
 			}
 			
 			if(this.perUsu > 0){
@@ -518,14 +511,6 @@ public class Usuario {
 			if(this.nomUsu != null && this.nomUsu.length() > 0){
 				count++;
 				preparedStatement.setString(count, "%" + DbUtil.EscapeLike(this.nomUsu) + "%");
-			}
-			if(this.nomMatUsu != null && this.nomMatUsu.length() > 0){
-				count++;
-				preparedStatement.setString(count, "%" + DbUtil.EscapeLike(this.nomMatUsu) + "%");
-			}
-			if(this.nomPatUsu != null && this.nomPatUsu.length() > 0){
-				count++;
-				preparedStatement.setString(count, "%" + DbUtil.EscapeLike(this.nomPatUsu) + "%");
 			}
 			if(this.perUsu > 0){
 				count++;

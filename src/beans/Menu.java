@@ -101,7 +101,7 @@ public class Menu {
 						(permiso != null && Arrays.asList(permiso).contains(Integer.toString(PerUsu)))){
 
 					if(m.direccion == null || m.direccion.equals("")){
-						menuStr.append("<li><a href=\"#\"> " + m.caption + "</a><ul class=\"dl-submenu\"><li class=\"dl-back\"><a href=\"#\">back</a></li> " + BuscarMenu(m.menuItem, PerUsu) + " </ul></li>");
+						menuStr.append("<li><a href=\"#\"> " + m.caption + "</a><ul class=\"dl-submenu\"><li class=\"dl-back\"><a href=\"#\">atrás</a></li> " + BuscarMenu(m.menuItem, PerUsu) + " </ul></li>");
 						
 					}else{
 	                    menuStr.append(" <li><a href='" + m.direccion + "'> " + m.caption + "</a>  </li>");    

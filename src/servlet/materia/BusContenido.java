@@ -1,6 +1,5 @@
 package servlet.materia;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -19,11 +18,9 @@ import beans.TrcnMat;
 import beans.Materia;
 import beans.PermisoContenido;
 import beans.Usuario;
-import sun.swing.StringUIClientPropertyKey;
 import util.common.Common;
 import util.conf.Configuracion;
 import util.db.MySqlConnector;
-import util.string.StringUtil;
 
 /**
  * Servlet implementation class BusContenido

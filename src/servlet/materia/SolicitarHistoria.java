@@ -1,10 +1,7 @@
 package servlet.materia;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.text.MessageFormat;
 import java.util.List;
 
 import javax.servlet.RequestDispatcher;
@@ -14,14 +11,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import beans.TrcnMat;
-import beans.Materia;
 import beans.MateriaSolicitud;
 import beans.Usuario;
 import util.common.Common;
 import util.conf.Configuracion;
-import util.db.MySqlConnector;
-import util.string.StringUtil;
 
 /**
  * Servlet implementation class SolicitarHistoria

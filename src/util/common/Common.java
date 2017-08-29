@@ -4,9 +4,10 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -212,6 +214,8 @@ public class Common {
 	/** Mensaje de error **/
 	public static final String MENSAJE_ERROR_MISMO_NOM_GRADO = "Cambia el nombre de directorio, por favor. Lo que escribió ya se está usando.";
 	/** Mensaje de error **/
+	public static final String MENSAJE_ERROR_MOVER_CARPETA = "Se produje error cuando movía la carpeta de la materia. No se ha cambiado lo que modificó usted.";
+	/** Mensaje de error **/
 	public static final String MENSAJE_ERROR = "Se produjo un error";
 	/** Mensaje de error **/
 	public static final String MENSAJE_NO_HAY_CAMBIO = "No hay cambio. Modifica algún campo, por favor";
@@ -235,12 +239,16 @@ public class Common {
 	public static final String MENSAJE_NO_SE_ENCUENTRA_ARCHIVO = "No se encuentra archivo {0}.";
 	/** Mensaje de error **/
 	public static final String MENSAJE_LIMIT_DE_NUMERO_DE_CARACTER = "Escribir dentro del límite del número de caracteres {0}.";
+	/** Mensaje de error **/
+	public static final String MENSAJE_SE_ENCUENTRA_DEMACIADOS_DATOS = "Se encontraron más de 1000 datos. Busca con más condiciones por favor.";
 
 	
 	/** Mensaje **/
-	public static final String MENSAJE_CONFIRMAR_IMPORTAR = "Materia \"{0}\" está en este sistema. Seguro que la borra y agrrega? \\n";
+	public static final String MENSAJE_CONFIRMAR_IMPORTAR = "Materia \"{0}\" está en este sistema. Seguro que la borra y agrrega? ";
 	/** Mensaje **/
 	public static final String MENSAJE_TERMINAR_PROCESO = "Terminó el proceso.";
+	/** Mensaje **/
+	public static final String MENSAJE_URL_PRUEBA = " URL de prueba es <a target='_blank' href={0}>{0}</a>";
 
 	
 	
@@ -288,6 +296,8 @@ public class Common {
 	public static final String TEXTO_ACTION_LOG_LIBERAR = "Siguiente materia se liberó la revisión: {0}";
 	/** Texto de action log **/
 	public static final String TEXTO_ACTION_LOG_PRODUCCION = "Siguiente materia se subió a producción: {0}";
+	/** Texto de action log **/
+	public static final String TEXTO_ACTION_LOG_REGRESAR_PENDIENTE = "Siguiente materia se regresó a 'Pendiente' de 'Está Producción': {0}";
 	/** Texto de action log **/
 	public static final String TEXTO_ACTION_LOG_USUARIO_DAR_BAJA = "Siguiente usuario dio de baja: {0}";
 	/** Texto de action log **/
@@ -435,31 +445,31 @@ public class Common {
 	 * @param request
 	 * @param count
 	 */
-	public static final int KEY_NUMERO_MOSTRAR = 10;
-	public static final int KEY_NUMERO_MOSTRAR_PAGINA = 10;
+	public static final int NUMERO_DE_DATOS_PARA_MOSTRAR = 50;
+	private static final int NUMERO_DE_PAGINA_PARA_MOSTRAR = 15;
 
 	public static String CreateListNumeroPagina(HttpServletRequest request, int totaldatos, int currentPagina) {
 		
-		int resto = totaldatos % KEY_NUMERO_MOSTRAR;
+		int resto = totaldatos % NUMERO_DE_DATOS_PARA_MOSTRAR;
 		int numeroPagina = 0;
 		if(resto>0){
-			numeroPagina = totaldatos / KEY_NUMERO_MOSTRAR + 1;
+			numeroPagina = totaldatos / NUMERO_DE_DATOS_PARA_MOSTRAR + 1;
 		}else{
-			numeroPagina = totaldatos / KEY_NUMERO_MOSTRAR;
+			numeroPagina = totaldatos / NUMERO_DE_DATOS_PARA_MOSTRAR;
 		}
 
 		int dispStart = currentPagina - 4;
 		if(dispStart <= 0){
 			dispStart = 1;
 		}
-		int dispEnd = dispStart + KEY_NUMERO_MOSTRAR-1;
+		int dispEnd = dispStart + NUMERO_DE_DATOS_PARA_MOSTRAR-1;
 		if(dispEnd > numeroPagina){
 			dispEnd = numeroPagina;
 		}
 		
-		if(dispEnd - dispStart + 1 < KEY_NUMERO_MOSTRAR_PAGINA){
-			if(dispEnd - KEY_NUMERO_MOSTRAR > 0){
-				dispStart = dispEnd - KEY_NUMERO_MOSTRAR +1;
+		if(dispEnd - dispStart + 1 < NUMERO_DE_PAGINA_PARA_MOSTRAR){
+			if(dispEnd - NUMERO_DE_DATOS_PARA_MOSTRAR > 0){
+				dispStart = dispEnd - NUMERO_DE_DATOS_PARA_MOSTRAR +1;
 			}else{
 				dispStart = 1;
 			}
@@ -590,8 +600,8 @@ public class Common {
 			        	
 			        	//Escribir html
 			        	if (checkBeforeWritefile(file)){
-			                PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
-								
+			                PrintWriter pw    = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file),"ISO-8859-1")));
+
 			                String piecompleto = "";
 							if(materia.getNivel() == Common.NIVEL_LICENCIATURA){
 								piecompleto = MessageFormat.format(pie, trcnm.getCaption());
@@ -599,6 +609,7 @@ public class Common {
 								piecompleto = pie;
 							}
 							
+				  			  Common.Error(piecompleto);
 							String replaceStr = (materia.GetPathMateriaRelative() + File.separator).
 									replaceAll(Matcher.quoteReplacement(File.separator), SLASH);
 			                String contenidoStr = trcnm.getContenido().replace(replaceStr, "");
@@ -882,6 +893,79 @@ public class Common {
 	}
 	
 
+	public static boolean Copiar(Materia materia) throws Exception{
+		
+		boolean result = false;
+		Configuracion config = new Configuracion();
+
+		String rootPath = "";
+		switch (materia.getNivel()) {
+			case Common.NIVEL_BACHILLERATO:
+				rootPath = config.getAbsolutePathBac();
+				break;
+			case Common.NIVEL_LICENCIATURA:
+				rootPath = config.getAbsolutePathLic();
+				break;
+			default:
+				break;
+		}
+
+		String pathMat = materia.GetPathMateria(rootPath);
+		if(materia.getNivel() == Common.NIVEL_LICENCIATURA){
+			pathMat = pathMat.replace("/Lic/", "/lic/");
+		}
+		
+		
+		try{
+			
+			File srcDir = new File(materia.GetPathMateriaAbsolute());
+			File destDir = new File(pathMat);
+			FileUtils.copyDirectory(srcDir, destDir);
+			
+			result = true;
+			
+		}catch(Exception e){
+			
+			throw e;
+		}
+		
+		
+		
+		
+//		Configuracion config = new Configuracion();
+//		String server = config.getFtpLicServer();
+//		int port = config.getFtpLicPort();
+//		String user = config.getFtpLicUser();
+//		String password = config.getFtpLicPassword();
+//
+//		Sftp ftp = new Sftp(server, port, user, password, true, true, "ISO-8859-1");
+//		
+//		boolean result = false;
+//	    
+//	    try {
+//
+//	      ftp.Connect();
+//
+//	      ftp.Delete(materia.getNomGrado() + "/" + materia.getModulo() + "/" + materia.getCveMat());
+//          
+//          result = ftp.Put(materia.GetPathMateriaAbsolute(), materia.getNomGrado() + "/" + materia.getModulo());
+//          
+//	    } catch(Exception e) {
+//	    	throw e;
+//	    } finally {
+//	    	if(ftp.getIsConnected()) {
+//		        try {
+//		        	ftp.Disconnect();
+//		        } catch(IOException ioe) {
+//	        }
+//	     }
+//	      
+//	  }
+	    return result;
+	    
+	}
+
+	
 	public static boolean FTPCopiar(Materia materia) throws Exception{
 		Configuracion config = new Configuracion();
 		String server = config.getFtpLicServer();

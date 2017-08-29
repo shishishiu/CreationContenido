@@ -250,7 +250,7 @@ public class VerArchivos extends HttpServlet {
 	
 	private String CreatePathDirHtml(String pathDirectory) {
 	
-		String[] arrStr = pathDirectory.split(Pattern.quote("\\"));
+		String[] arrStr = pathDirectory.split(Pattern.quote(File.separator));
 		String html = "";
 		int idx = 0;
 		
@@ -292,7 +292,7 @@ public class VerArchivos extends HttpServlet {
 		
 		}
 		
-		html += "<script>$('.folder').dblclick(function() {funcAbrirCarpeta(" + pathDirectory.split(Pattern.quote("\\")).length + ",$('.foldername', this).html());});</script></div>";
+		html += "<script>$('.folder').dblclick(function() {funcAbrirCarpeta(" + pathDirectory.split(Pattern.quote(File.separator)).length + ",$('.foldername', this).html());});</script></div>";
 
 		
 		return html;

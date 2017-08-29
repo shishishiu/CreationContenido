@@ -147,13 +147,24 @@ public class VerContenido extends HttpServlet {
 		bean.setCveUsu(usuario.getCveUsu());
 		bean.setCveMat(cveMat);
 		try {
-			if(usuario.getPerUsu() == Common.PERMISO_ADMINISTRADOR 
-					|| usuario.getPerUsu() == Common.PERMISO_ADMINISTRADOR_GENERAL){
+			if(usuario.getPerUsu() == Common.PERMISO_ADMINISTRADOR_GENERAL){
+				return true;
+			}
+
+			Materia matBean = Materia.Buscar(cveMat);
+			
+			if(usuario.getPerUsu() == Common.PERMISO_ADMINISTRADOR){
+				int estadoSolicitud = matBean.getMatSol().getEstadoSolicitud();
+				if(estadoSolicitud != Common.ESTADO_DE_SOLICITUD_REVISADO && 
+						estadoSolicitud != Common.ESTADO_DE_SOLICITUD_VALIDADO){
+					request.setAttribute(KEY_VARIABLE_PERMISO_MODIFICAR, false);				
+				}					
 				return true;
 			}
 			
 			List<PermisoContenido> list = bean.Buscar();
-			Materia matBean = Materia.Buscar(cveMat);
+
+			
 			
 			if(list.size() <= 0){
 				return false;
@@ -168,11 +179,6 @@ public class VerContenido extends HttpServlet {
 					break;
 				case Common.PERMISO_REVISOR:
 					if(estadoSolicitud != Common.ESTADO_DE_SOLICITUD_SOLICITADO){
-						request.setAttribute(KEY_VARIABLE_PERMISO_MODIFICAR, false);				
-					}					
-					break;
-				case Common.PERMISO_ADMINISTRADOR:
-					if(estadoSolicitud != Common.ESTADO_DE_SOLICITUD_REVISADO){
 						request.setAttribute(KEY_VARIABLE_PERMISO_MODIFICAR, false);				
 					}					
 					break;

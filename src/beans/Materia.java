@@ -293,7 +293,7 @@ public class Materia implements Serializable {
 		PreparedStatement preparedStatement = null;
 		
 		try {			
-			String query = "SELECT m.cveMat ,m.nomMat ,m.modulo ,m.unid ,m.banMat ,m.fechaModf ,ng.nomGrado "
+			String query = "SELECT m.cveMat ,m.nomMat ,m.modulo ,m.unid ,m.banMat ,m.fechaModf ,ng.nomGrado, ng.nomniv_grado "
 					+ " ,n.cveNiv, n.nomniv ,n.nomDir ,mc.nomCode ,IFNULL(s.estadoSolicitud,0) AS estadoSolicitud, "
 					+ " fechasolicitud, pc.permiso" 
 					+ queryBuscar;
@@ -328,6 +328,7 @@ public class Materia implements Serializable {
 				m.unidad = rs.getInt("unid");
 				m.nivel = rs.getInt("cveNiv");
 				m.nomNivel = rs.getString("nomNiv");
+				m.nomNivelGrado = rs.getString("nomniv_grado");
 				m.permisoContenido = rs.getInt("permiso");
 				m.banMat = rs.getInt("banMat");
 				m.fechaModf = rs.getTimestamp("fechaModf");
@@ -509,6 +510,168 @@ public class Materia implements Serializable {
 		}
 	}
 
+
+	public static int CountMateriaDeExternoBac(Connection con) throws Exception {
+		int cnt = 0;
+		
+		PreparedStatement preparedStatement = null;
+		
+		try {			
+			String query = "SELECT count(A.CveMat) cnt FROM tblmat A WHERE A.BanMat=1 ";
+			
+			preparedStatement = con.prepareStatement(query);
+						
+			ResultSet rs = preparedStatement.executeQuery();   
+			while (rs.next())
+			{
+				cnt = rs.getInt("cnt");
+ 			}
+	
+		} catch (SQLException e) {
+			throw e;
+		} finally{
+			if (preparedStatement != null) {
+				preparedStatement.close();
+	        }
+			if (con != null) {
+				con.close();
+	        }
+		}
+		
+		return cnt;
+	}
+	public static int CountMateriaDeExternoLic(Connection con, int nivelGrado) throws Exception {
+
+		int cnt = 0;
+		
+		PreparedStatement preparedStatement = null;
+		
+		try {			
+			String query = "SELECT count(A.CveMat) cnt FROM tblmat A, tblniv_grado B WHERE A.CveNiv = B.CveNiv_Grado AND B.CveNiv_Grado = ? AND A.BanMat=1 ";
+			
+			preparedStatement = con.prepareStatement(query);
+
+			preparedStatement.setInt(1, nivelGrado);
+						
+			ResultSet rs = preparedStatement.executeQuery();   
+			while (rs.next())
+			{
+				cnt = rs.getInt("cnt");
+ 			}
+	
+		} catch (SQLException e) {
+			throw e;
+		} finally{
+			if (preparedStatement != null) {
+				preparedStatement.close();
+	        }
+			if (con != null) {
+				con.close();
+	        }
+		}
+		
+		return cnt;
+	}
+
+	
+	/**
+	 * Buscar en el sistema de Bachillerato
+	 * @param con
+	 * @param limitfrom
+	 * @param numeromostrar
+	 * @return
+	 * @throws Exception
+	 */
+	public static List<Materia> BuscarDeExternoBac(Connection con, int limitfrom, int numeromostrar) throws Exception{
+		List<Materia> listMat = new ArrayList<Materia>();
+		Materia m = null;
+		PreparedStatement preparedStatement = null;
+		
+		try {			
+			String query = "SELECT A.CveMat, A.NomMat FROM tblmat A WHERE A.BanMat=1"
+							+ " ORDER BY A.CveMat"
+							+ " LIMIT ?, ?";
+			
+			preparedStatement = con.prepareStatement(query.toString());
+			preparedStatement.setInt(1, limitfrom);
+			preparedStatement.setInt(2, numeromostrar);
+
+			ResultSet rs = preparedStatement.executeQuery();   
+			while (rs.next())
+			{
+				m = new Materia();
+				m.cveMat = rs.getString("CveMat");
+				m.nomMat = rs.getString("NomMat");
+				m.nivel = Common.NIVEL_BACHILLERATO;
+
+				listMat.add(m);
+				 
+			}
+			
+	
+		} catch (SQLException e) {
+			throw e;
+		} finally{
+			if (preparedStatement != null) {
+				preparedStatement.close();
+	        }
+		}
+		
+		return listMat;
+	}
+
+
+	/**
+	 * Buscar en el sistema de Licenciatura
+	 * @param con
+	 * @param nivelGrado
+	 * @param limitfrom
+	 * @param numeromostrar
+	 * @return
+	 * @throws Exception
+	 */
+	public static List<Materia> BuscarDeExternoLic(Connection con, int nivelGrado, int limitfrom, int numeromostrar) throws Exception{
+		List<Materia> listMat = new ArrayList<Materia>();
+		Materia m = null;
+		PreparedStatement preparedStatement = null;
+		
+		try {			
+			String query = 
+					"SELECT A.CveMat, A.NomMat FROM tblmat A, tblniv_grado B WHERE A.CveNiv = B.CveNiv_Grado and B.CveNiv_Grado = ? AND A.BanMat=1 "
+					+ " ORDER BY A.CveMat"
+					+ " LIMIT ?, ?";
+
+			preparedStatement = con.prepareStatement(query.toString());
+			preparedStatement.setInt(1, nivelGrado);
+			preparedStatement.setInt(2, limitfrom);
+			preparedStatement.setInt(3, numeromostrar);
+
+			ResultSet rs = preparedStatement.executeQuery();   
+			while (rs.next())
+			{
+				m = new Materia();
+				m.cveMat = rs.getString("CveMat");
+				m.nomMat = rs.getString("NomMat");
+				m.nivel = Common.NIVEL_LICENCIATURA;
+				m.cveNivelGrado = nivelGrado;
+
+				listMat.add(m);
+  			}
+			
+	
+		} catch (SQLException e) {
+			throw e;
+		} finally{
+			if (preparedStatement != null) {
+				preparedStatement.close();
+	        }
+		}
+		
+		return listMat;
+	}
+
+	
+	
 	/**
 	 * Buscar en el sistema de Bachillerato o Licenciatura
 	 * @param con
@@ -522,7 +685,7 @@ public class Materia implements Serializable {
 		
 		try {			
 			String query = 
-					"SELECT m.cveMat ,m.nomMat ,m.sem ,m.unid ,m.banMat"
+					"SELECT m.cveMat ,m.nomMat ,m.sem ,m.unid ,m.banMat, m.cveNiv"
 					+ " FROM tblmat m"
 					+ " WHERE m.cveMat = ? AND banMat = 1";
 			
@@ -537,12 +700,17 @@ public class Materia implements Serializable {
 				m.nomMat = rs.getString("nomMat");
 				m.modulo = rs.getInt("sem");
 				m.unidad = rs.getInt("unid");
-//				m.cveNivelGrado = rs.getInt("cveNiv");
+				m.cveNivelGrado = rs.getInt("cveNiv");
 //				m.nomGrado = rs.getString("nmggrado");
-//				m.nomNivelDir = rs.getString("nomNivelDir");
 				m.banMat = rs.getInt("banMat");
 
  			}
+			
+			NivelGrado bean = NivelGrado.BuscarConCveNivGrado(m.cveNivelGrado);
+			Nivel beanNv= Nivel.Buscar(bean.getCveNivel());
+			m.nomNivelDir = beanNv.getNomDir();
+			m.nomGrado = bean.getNomGrado();
+			
 	
 		} catch (SQLException e) {
 			throw e;
@@ -789,12 +957,11 @@ public class Materia implements Serializable {
 				replaceAll(Matcher.quoteReplacement(File.separator), Common.SLASH);
 	}
 	
-	private String GetPathMateria(String prefix){
+	public String GetPathMateria(String prefix){
 		return prefix 	    
 				+ File.separator + this.nomNivelDir + File.separator 
 	    		+ this.nomGrado + File.separator + this.modulo + File.separator + this.cveMat;
 
 	}
-
 	
 }

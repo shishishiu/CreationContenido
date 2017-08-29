@@ -55,6 +55,8 @@ public class Ftp {
 	    this.client.setControlEncoding(this.encoding);
 	    client.connect(this.hostName, this.port);
 
+	    this.client.enterLocalPassiveMode();
+	    
 	    this.client.login(this.userName, this.password);
 
 	    if ( !FTPReply.isPositiveCompletion(this.client.getReplyCode()) ) {

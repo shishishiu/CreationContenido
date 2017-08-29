@@ -25,7 +25,7 @@ function funcModificar(key, idx){
 	var val = $("#val" + idx).val();
 			
 	document.getElementById("modificar" + idx).disabled = true
-	$("#wait" + idx).html("<img src='images/loading.gif' style='vertical-align:middle'>");
+	$("#wait" + idx).html("<img src='images/loading.gif' style='vertical-align:middle;width:50px;height:60px'>");
 
 	try{
 				

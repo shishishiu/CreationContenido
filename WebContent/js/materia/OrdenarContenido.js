@@ -48,7 +48,10 @@ function funcOrdenarContenido(padreId){
 				  document.getElementById("ordenar").disabled = false
 				  return false;
 			  } else{
-				  location.reload();
+				  
+				  var cveMat = document.getElementById("hiddenCveMat").value;
+				  location.href="BusContenido?cveMat=" + cveMat;
+				  
 			  }			  
 		  }
 	})		

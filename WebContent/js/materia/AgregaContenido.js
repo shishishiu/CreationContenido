@@ -53,7 +53,8 @@ function funcAgregaContenido(cveMat, padreId){
 				  document.getElementById("agregar").disabled = false
 				  return false;
 			  } else{
-				  location.reload();
+
+				  location.href="BusContenido?cveMat=" + cveMat;
 			  }			  
 		  }
 		})

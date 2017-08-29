@@ -34,7 +34,7 @@ $(function(){
 function IsPrimerDir(){
 	
 	var pathDirectory = $("#pathDirectory").val();
-	var arrDir = pathDirectory.split("\\");
+	var arrDir = pathDirectory.split("/");
 	if(arrDir.length <=1){
 		return true;
 	}
@@ -52,17 +52,19 @@ function funcAbrirCarpeta(idxCarpeta, foldername){
 	var cveCont = $("#hiddenCveCont").val();
 	var pathDirectory = $("#pathDirectory").val();
 	
-	var arrDir = pathDirectory.split("\\");
+	var arrDir = pathDirectory.split("/");
+	
+	
 	if(arrDir.length-1 < idxCarpeta){
 		
-		$("#pathDirectory").val(pathDirectory + "\\" + foldername);
+		$("#pathDirectory").val(pathDirectory + "/" + foldername);
 		
 	}else{
 		
 		var str = "";
 		for (i = 0; i <= idxCarpeta; i++) {
 			if(str.length > 0) {
-				str += "\\";
+				str += "/";
 			}
 		    str += arrDir[i];
 		}

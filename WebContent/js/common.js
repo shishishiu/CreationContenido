@@ -86,6 +86,9 @@ function funcMostrarSolicitarHistoria(){
     	modal: true,
     	title: "Historia",
     	width: wsize,
-    	height: hsize
+    	height: hsize,
+    	close:function(event,ui){
+    		$(this).destroy();
+    	}
     });
 }

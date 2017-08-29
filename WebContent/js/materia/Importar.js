@@ -12,21 +12,22 @@ $(function(){
 	
 	funcResizeMain();
 
+	$( "tr.datarow" ).hover(
+			function() {
+			  $(this).addClass("highlight");
+			}, 
+			function(){
+				$(this).removeClass("highlight");
+			});
 
 });
 
-function funcImportar(){
+function funcImportar(cveMat, nivel, nivelgrado){
 	$("#innerMessage").html("");
 	$("#message").hide();
-	BotonImporDisabled("disabled");
 
-	if(!Validacion()){
-		BotonImporDisabled("");
-		return;
-	}
 
 	if(!confirm("Seguro que importar la materia?")){
-		BotonImporDisabled("");
 		return false;
 	}			
 	
@@ -37,8 +38,9 @@ function funcImportar(){
 		  method: "POST",
 		  url: "Importar",
 		  headers: {"HTTP_X_REQUESTED_WITH": "xmlhttprequest"},
-		  data: { nivel: document.getElementById("nivel").value,
-			  	  cveMat: document.getElementById("cveMat").value,
+		  data: { nivel: nivel,
+			      nivelGrado: nivelgrado,
+			  	  cveMat: cveMat,
 			  	  hiddenTipo: 1
 			  	},
 		  async: true,
@@ -46,7 +48,6 @@ function funcImportar(){
 			  if(data['status'] == "error"){
 				  $("#innerMessage").html(data['message']);
 				  $("#message").show();
-					BotonImporDisabled("");
 	
 			  }else if(data['status'] == "noAutorizado"){
 				  location.href = "AutentificaError";
@@ -54,7 +55,6 @@ function funcImportar(){
 			  }else if(data['status'] == "success"){
 				  if(data['message'] != ""){
 					  if(!confirm(data['message'])){
-						  BotonImporDisabled("");
 						  return false;
 					  }
 				  }
@@ -64,50 +64,36 @@ function funcImportar(){
 		  error : function(xhr, ajaxOptions, thrownError) {
 			  $("#innerMessage").html("Error. No pudo exportar." + thrownError);
 			  $("#message").show();
-			  BotonImporDisabled("");
 		  }
 	}).done(function(){
 			
 		if(flgImport){
-			  Importar();
+			  Importar(cveMat, nivel);
 		}
 			
 	});
 
 }
 
-function BotonImporDisabled(isDisabled){
-	$("#importar").prop("disabled", isDisabled);	
-}
-
-function Importar(){
+function Importar(cveMat,nivel){
 	document.getElementById("hiddenTipo").value = 2;
+	document.getElementById("hiddenCveMat").value = cveMat;
+	document.getElementById("hiddenNivel").value = nivel;
 	document.forms["form1"].action = "Importar";
     document.forms["form1"].submit();	
 	
 }
 
-function Validacion(){
-	var elemNivel = document.getElementById("nivel");
-	if(elemNivel.value <= 0){
-		alert("Elige el nivel, por favor.");
-		elemNivel.focus();
-		return false;
-	}
-	var elemNivelGrado = document.getElementById("nivelGrado"+elemNivel.value);
-	var nivelgrado = elemNivelGrado.value;
-	if(isNaN(nivelgrado) || nivelgrado <= 0){
-		alert("Elige el nivel grado, por favor.");
-		elemNivelGrado.focus();
-		return false;
-	}
+function funcBuscar(){
+	
+	document.getElementById("hiddenTipo").value = 3;
+	document.forms["form1"].action = "Importar";
+    document.forms["form1"].submit();
+		
+}
 
-	var elemMat = document.getElementById("cveMat");
-	if(elemMat.value == ""){
-		alert("Ingresa materia, por favor.");
-		elemMat.focus();
-		return false;
-	}
-
-	return true;
+function funcMovePagina(numpagina){
+	document.getElementById("hiddenCurrentPagina").value = numpagina;
+	document.forms["form1"].action = "Importar";
+    document.forms["form1"].submit();
 }

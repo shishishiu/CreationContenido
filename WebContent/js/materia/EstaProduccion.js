@@ -8,7 +8,7 @@ function funcRegreso(){
     location.href = "BusMat"
 }
 
-function funcRevisar(){
+function funcEnviar(){
 	
 	document.getElementById("hiddenTipo").value = 1;
 	
@@ -34,11 +34,11 @@ function funcRevisar(){
 		return false;
 	}
 	
-	if(!confirm("Seguro que revisa la materia")){
+	if(!confirm("Seguro que envía el resultado?")){
 		return false;
 	}
 	
-	document.forms["form1"].action = "Revisar";
+	document.forms["form1"].action = "EstaProduccion";
     document.forms["form1"].submit();
 
 }

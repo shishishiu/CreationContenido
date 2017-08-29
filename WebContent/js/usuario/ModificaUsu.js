@@ -107,17 +107,6 @@ function isValidado(){
 		return false;
 	}
 	
-	var elemPwsUsu = document.getElementById("pwsUsu");
-	if(elemPwsUsu.value == ""){
-		alert("Ingresa contraseña, por favor.");
-		elemPwsUsu.focus();
-		return false;
-	}
-	if(elemPwsUsu.value.length > 21){
-		alert("Ingresa menos de 21 letras en contraseña, por favor.");
-		elemPwsUsu.focus();
-		return false;
-	}
 
 	return true;
 	
